@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>情報Ⅰ：コンピュータの構成(1)</title>
+  <style>
+    :root {
+      --primary: #185FA5;
+      --teal:    #0F6E56;
+      --purple:  #534AB7;
+      --amber:   #BA7517;
+      --coral:   #993C1D;
+      --gray:    #5F5E5A;
+      --bg:      #f5f7fa;
+      --drop-bg: #fff9c4;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Yu Gothic","游ゴシック",sans-serif; background: var(--bg); margin: 0; padding: 0; font-size: 14px; line-height: 1.9; color: #222; }
+
+    /* ── sticky header ── */
+    .sticky-header { position: sticky; top: 0; background: var(--bg); z-index: 1000; border-bottom: 2px solid #ddd; padding: 8px 0; }
+    .page-nav { max-width: 1050px; margin: 0 auto 6px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+    .nav-btn { text-decoration: none; background: #7f8c8d; color: #fff; padding: 5px 13px; border-radius: 4px; font-size: .78em; font-weight: bold; transition: .2s; }
+    .nav-btn:hover { background: #34495e; }
+    .nav-btn.active { background: var(--primary); border: 2px solid #f1c40f; }
+
+    /* ── challenge panel ── */
+    .challenge-panel {
+      background: #eaf0fb; border: 1.5px solid #aed6f1; color: var(--primary);
+      padding: 8px 20px; border-radius: 8px;
+      display: flex; justify-content: space-around; align-items: center;
+      max-width: 1050px; margin: 0 auto 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .timer { font-size: 1.5em; font-family: monospace; font-weight: bold; color: var(--primary); }
+    .ch-btn { border: none; cursor: pointer; padding: 7px 18px; border-radius: 20px; font-weight: bold; font-size: .9em; transition: .2s; }
+    .ch-btn.start  { background: var(--teal);    color: #fff; }
+    .ch-btn.start:hover  { background: #0a4f3c; }
+    .ch-btn.answer { background: #f39c12;        color: #fff; }
+    .ch-btn.answer:hover { background: #d68910; }
+    .ch-btn.check  { background: var(--primary); color: #fff; }
+    .ch-btn.check:hover  { background: #0d3e6e; }
+    #recordDisplay { font-weight: bold; font-size: .9em; color: #8B6914; }
+
+    /* ── word bank ── */
+    .word-bank-wrap { max-width: 1050px; margin: 0 auto; }
+    .word-bank-container { background: #eee; padding: 12px 16px; border-radius: 8px; border: 1px solid #ccc; }
+    .wb-label { font-size: .82em; color: #555; margin-bottom: 6px; font-weight: bold; }
+    .word-bank { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
+    .drag-item { background: #fff; color: #c0392b; border: 1px solid #aaa; padding: 3px 12px; cursor: pointer; font-weight: bold; font-size: .9em; border-radius: 3px; transition: .15s; }
+    .drag-item.selected { background: #f1c40f; color: #333; box-shadow: 0 0 0 3px #e67e22; transform: scale(1.08); }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+    .word-bank-container.shake { animation: shake .4s ease; }
+
+    /* ── drop zone ── */
+    .dz {
+      display: inline-block; min-width: 90px; height: 1.55em;
+      background: var(--drop-bg); border: 1.5px solid #aaa;
+      vertical-align: middle; cursor: pointer; text-align: center;
+      font-weight: bold; color: #c0392b; padding: 1px 8px;
+      border-radius: 3px; transition: .15s; white-space: nowrap;
+    }
+    .dz.correct { background: #d4edda !important; border: 2px solid #28a745 !important; color: #155724 !important; }
+    .dz.wrong   { background: #f8d7da !important; border: 2px solid #dc3545 !important; color: #721c24 !important; }
+
+    /* ── main ── */
+    .container { max-width: 1050px; margin: 16px auto; background: #fff; padding: 28px 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+    /* ── section heading ── */
+    .sec-h1 { font-size: 1.25em; font-weight: bold; color: var(--primary); border-bottom: 3px solid var(--primary); padding-bottom: 6px; margin: 28px 0 14px; }
+    .sec-h1 .num { font-size: .95em; margin-right: 8px; }
+    .sec-h2 { font-size: 1em; font-weight: bold; color: var(--primary); border-left: 5px solid var(--primary); padding-left: 10px; margin: 20px 0 10px; }
+
+    /* ── hw/sw 2-column table ── */
+    .hw-sw-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    .hw-sw-table th { padding: 9px 16px; text-align: center; font-size: .95em; }
+    .hw-sw-table td { padding: 9px 16px; font-size: .9em; vertical-align: top; border: 1px solid #ddd; }
+    .hw-sw-table .hw-head { background: var(--primary); color: #fff; border: 1px solid var(--primary); }
+    .hw-sw-table .sw-head { background: var(--teal);    color: #fff; border: 1px solid var(--teal); }
+    .hw-sw-table .hw-body { background: #eef4fb; }
+    .hw-sw-table .sw-body { background: #edfaf4; }
+    .hw-sw-table .hw-body .sub { color: var(--primary); font-weight: bold; }
+    .hw-sw-table .sw-body .sub { color: var(--teal);    font-weight: bold; }
+
+    /* ── 5大装置 table ── */
+    table.godan { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    table.godan th { background: var(--primary); color: #fff; padding: 8px 12px; text-align: center; font-size: .9em; }
+    table.godan td { padding: 8px 12px; border: 1px solid #ddd; font-size: .9em; vertical-align: top; }
+    table.godan tr:nth-child(even) td { background: #f0f4fa; }
+    .tag { display: inline-block; font-weight: bold; padding: 2px 8px; border-radius: 3px; font-size: .88em; }
+    .tag-amber  { background: #faeeda; color: var(--amber);  border: 1px solid var(--amber); }
+    .tag-teal   { background: #edfaf4; color: var(--teal);   border: 1px solid var(--teal); }
+    .tag-blue   { background: #eff5fc; color: var(--primary);border: 1px solid var(--primary); }
+    .tag-gray   { background: #f1efe8; color: var(--gray);   border: 1px solid #aaa; }
+    .tag-coral  { background: #fdf3f0; color: var(--coral);  border: 1px solid var(--coral); }
+
+    /* ── 構成図 ── */
+    .diagram-wrap { border: 2px solid var(--primary); border-radius: 10px; padding: 16px; margin: 14px 0; background: #f8fbff; }
+    .diagram-title { font-size: .82em; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+    .diagram { display: flex; align-items: stretch; gap: 0; }
+    .diag-in, .diag-out {
+      border: 2px solid var(--gray); border-radius: 8px; background: #f5f5f3;
+      padding: 14px 12px; text-align: center; min-width: 90px; font-size: .85em;
+      display: flex; flex-direction: column; justify-content: center; gap: 6px;
+    }
+    .diag-in .d-title, .diag-out .d-title { font-weight: bold; color: var(--gray); font-size: .95em; }
+    .diag-in .d-sub, .diag-out .d-sub { font-size: .8em; color: #888; }
+    .diag-arrow { align-self: center; font-size: 1.5em; color: #888; padding: 0 6px; flex-shrink: 0; }
+    .diag-body {
+      flex: 1; border: 2.5px solid var(--primary); border-radius: 10px;
+      background: #fff; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .diag-body-title { font-size: .78em; color: var(--primary); font-weight: bold; text-align: right; }
+    .diag-inner { display: flex; gap: 12px; align-items: stretch; }
+    .diag-cpu {
+      border: 2px solid var(--purple); border-radius: 8px;
+      background: #f2f1fd; padding: 10px 12px; flex: 1;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .diag-cpu-title { font-weight: bold; color: var(--purple); font-size: .9em; text-align: center; }
+    .diag-unit {
+      border: 2px solid; border-radius: 5px; padding: 6px 8px;
+      text-align: center; font-size: .82em; font-weight: bold;
+    }
+    .diag-unit.cu  { border-color: var(--teal);   background: #edfaf4; color: var(--teal); }
+    .diag-unit.alu { border-color: var(--amber);  background: #faeeda; color: var(--amber); }
+    .diag-bidir { align-self: center; font-size: 1.2em; color: #888; flex-shrink: 0; }
+    .diag-mem {
+      border: 2px solid var(--primary); border-radius: 8px;
+      background: #eff5fc; padding: 10px 12px; flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 4px;
+    }
+    .diag-mem-title { font-weight: bold; color: var(--primary); font-size: .9em; }
+    .diag-mem-sub   { font-size: .78em; color: #666; }
+    .diag-note { font-size: .78em; color: #888; margin-top: 4px; }
+
+    /* ── popup button ── */
+    .pb {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: var(--primary); color: #fff;
+      border: none; cursor: pointer; padding: 2px 10px 2px 8px;
+      border-radius: 12px; font-size: .82em; font-weight: bold;
+      margin: 2px; transition: .15s; vertical-align: middle;
+    }
+    .pb:hover { background: #0d3e6e; }
+
+    /* ── CPU box ── */
+    .cpu-box {
+      background: #eff5fc; border: 2px solid var(--primary);
+      border-radius: 8px; padding: 14px 18px; margin: 14px 0;
+    }
+    .cpu-box-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: .95em; display: flex; align-items: center; gap: 8px; }
+    .cpu-box-title .icon { font-size: 1.1em; }
+    .cpu-box p { margin: 4px 0; font-size: .9em; color: #333; }
+
+    /* ── modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 9000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 12px; padding: 26px 30px; max-width: 500px; width: 92%; box-shadow: 0 8px 32px rgba(0,0,0,.2); position: relative; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .modal-title   { font-size: 1.1em; font-weight: bold; color: var(--primary); margin-bottom: 6px; border-bottom: 2px solid var(--primary); padding-bottom: 6px; }
+    .modal-english { font-family: monospace; font-size: .95em; color: var(--teal); margin-bottom: 10px; font-weight: bold; }
+    .modal-meaning { background: #f0f4fa; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; font-size: .88em; color: #333; }
+    .modal-body    { font-size: .92em; line-height: 1.9; color: #333; }
+    .modal-example { background: #f5f5f5; border-left: 4px solid var(--teal); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; font-size: .88em; }
+    .modal-close   { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.4em; cursor: pointer; color: #888; }
+    .modal-close:hover { color: #333; }
+    .modal-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .88em; }
+    .modal-table th { background: var(--primary); color: #fff; padding: 5px 10px; text-align: left; }
+    .modal-table td { padding: 5px 10px; border: 1px solid #ddd; }
+    .modal-table tr:nth-child(even) td { background: #f0f4fa; }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .diagram { flex-direction: column; }
+      .diag-arrow { transform: rotate(90deg); align-self: center; }
+      .diag-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- modal -->
+<div class="modal-overlay" id="popupModal" onclick="closePopup(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePopup()">✕</button>
+    <div class="modal-title"   id="popupTitle"></div>
+    <div class="modal-english" id="popupEnglish"></div>
+    <div class="modal-meaning" id="popupMeaning" style="display:none"></div>
+    <div class="modal-body"    id="popupBody"></div>
+    <div class="modal-example" id="popupExample" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══ sticky header ══ -->
+<div class="sticky-header">
+    <div class="page-nav">
+    <a class="nav-btn" href="joho1.html">📖 第1章　コンピュータのしくみ</a>
+    <a class="nav-btn" href="joho1-1.html">✏️ 第1章　演習問題</a>
+    <a class="nav-btn active" href="joho2.html">📖 第2章　構成(1)</a>
+    <a class="nav-btn" href="joho3.html">📖 第2章　構成(2)</a>
+    <a class="nav-btn" href="joho4.html">✏️ 第2章　演習問題</a>
+  </div>
+
+  <div class="challenge-panel">
+    <div>
+      <span style="font-size:.85em;font-weight:bold;">⏱ チャレンジタイム</span><br>
+      <span class="timer" id="timerDisplay">00:00.0</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="ch-btn start"  onclick="startChallenge()">▶ チャレンジ開始</button>
+      <button class="ch-btn check"  onclick="checkAnswers()">✓ 答え合わせ</button>
+      <button class="ch-btn answer" onclick="showModel()">📖 お手本を見る</button>
+    </div>
+    <div id="recordDisplay">🏆 ベスト：—</div>
+  </div>
+
+  <div class="word-bank-wrap">
+    <div class="word-bank-container" id="wordBankContainer">
+      <div class="wb-label">📦 語句バンク（クリックで選択 → 空欄をクリックで入力）</div>
+      <div class="word-bank" id="wordBank"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ content ══ -->
+<div class="container">
+
+  <!-- ページタイトル -->
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:1.5em;font-weight:bold;color:var(--primary);margin-bottom:4px;">コンピュータの構成 (1)</div>
+    <div style="color:var(--teal);font-size:.95em;">ハードウェア・ソフトウェア・5大装置</div>
+    <p style="font-size:.92em;color:#444;line-height:1.9;text-align:left;margin-top:12px;">
+      コンピュータは大きく「ハードウェア」と「ソフトウェア」の2つの要素からできています。
+      その中核となるCPUを含む<strong>5大装置</strong>の構成は共通テストで頻繁に出題されます。しっかり押さえましょう。
+    </p>
+  </div>
+
+  <!-- ══ 1. コンピュータの基本構成 ══ -->
+  <div class="sec-h1"><span class="num">1</span>コンピュータの基本構成</div>
+
+  <p>コンピュータは大きく「<strong>【ハードウェア】</strong>」と「<strong>【ソフトウェア】</strong>」の2つの要素からできています。</p>
+
+  <table class="hw-sw-table">
+    <tr>
+      <th class="hw-head">【ハードウェア】</th>
+      <th class="sw-head">【ソフトウェア】</th>
+    </tr>
+    <tr>
+      <td class="hw-body">
+        <div class="sub">物理的な装置・部品のこと</div>
+        CPU・メモリ・キーボード・ディスプレイ・HDDなど
+      </td>
+      <td class="sw-body">
+        <div class="sub">コンピュータを動かす仕組み・プログラム</div>
+        OS（基本ソフトウェア）・アプリ（応用ソフトウェア）など
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin-top:8px;">
+    <button class="pb" onclick="openPopup('hardware')">💡 ハードウェア</button>
+    <button class="pb" onclick="openPopup('software')">💡 ソフトウェア</button>
+    <button class="pb" onclick="openPopup('os')">💡 OS（基本ソフトウェア）</button>
+  </p>
+
+  <!-- ══ 2. 5大装置 ══ -->
+  <div class="sec-h1"><span class="num">2</span>コンピュータの【5大装置】</div>
+
+  <p>コンピュータのハードウェアは、次の【5大装置】から構成されています。これは共通テストで頻繁に出題されます。</p>
+
+  <table class="godan">
+    <tr>
+      <th>装置名</th><th>英語名</th><th>役割・説明</th>
+    </tr>
+    <tr>
+      <td><span class="tag tag-amber">【演算装置】</span></td>
+      <td><button class="pb" onclick="openPopup('alu')">💡 ALU</button></td>
+      <td>四則演算やデータの比較・判断を行う。CPUの中にある。</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-teal">【制御装置】</span></td>
+      <td><button class="pb" onclick="openPopup('cu')">💡 CU</button></td>
+      <td>プログラムから命令を取り出し、解釈して各装置に指示を出す。CPUの中にある。</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-blue">【記憶装置】</span></td>
+      <td>Memory</td>
+      <td>プログラムやデータを記憶する。主記憶（RAM）と補助記憶（HDD/SSD）がある。</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-gray">【入力装置】</span></td>
+      <td>Input</td>
+      <td>プログラムやデータを外部から取り込む。キーボード・マウス・スキャナなど。</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-coral">【出力装置】</span></td>
+      <td>Output</td>
+      <td>処理されたデータを外部に出力する。ディスプレイ・プリンタ・スピーカーなど。</td>
+    </tr>
+  </table>
+
+  <!-- 穴埋め -->
+  <p style="margin-top:12px;font-size:.9em;">
+    ※ CPU は
+    <span class="dz" data-ans="制御装置" data-id="c1">　　　　</span>（CU）と
+    <span class="dz" data-ans="演算装置" data-id="c2">　　　　</span>（ALU）をまとめた呼び名です。
+  </p>
+
+  <!-- ▶ 5大装置の構成図 -->
+  <div class="sec-h2">▶ 5大装置の構成図</div>
+
+  <div class="diagram-wrap">
+    <div class="diagram-title">（図）5大装置の構成</div>
+    <div class="diagram">
+      <!-- 入力装置 -->
+      <div class="diag-in">
+        <div class="d-title">入力装置</div>
+        <div class="d-sub">キーボード<br>マウスなど</div>
+      </div>
+      <div class="diag-arrow">→</div>
+
+      <!-- コンピュータ本体 -->
+      <div class="diag-body">
+        <div class="diag-body-title">コンピュータ本体</div>
+        <div class="diag-inner">
+          <!-- CPU -->
+          <div class="diag-cpu">
+            <div class="diag-cpu-title">CPU</div>
+            <div class="diag-unit cu">制御装置（CU）</div>
+            <div class="diag-unit alu">演算装置（ALU）</div>
+          </div>
+          <div class="diag-bidir">↔</div>
+          <!-- 記憶装置 -->
+          <div class="diag-mem">
+            <div class="diag-mem-title">記憶装置</div>
+            <div class="diag-mem-sub">（RAM・SSDなど）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="diag-arrow">→</div>
+      <!-- 出力装置 -->
+      <div class="diag-out">
+        <div class="d-title">出力装置</div>
+        <div class="d-sub">ディスプレイ<br>プリンタなど</div>
+      </div>
+    </div>
+    <div class="diag-note">※ → はデータの流れを示します。CPU（中央処理装置）は制御装置と演算装置をまとめた呼び名です。</div>
+  </div>
+
+  <!-- ALU・CU 正式名称表（ポップアップ） -->
+  <div class="sec-h2">▶ ALU・CU の正式名称</div>
+  <p>以下のボタンをクリックして正式名称と語の意味を確認しましょう。</p>
+  <table class="godan">
+    <tr>
+      <th>装置</th><th>正式名称（英語）</th><th>語の意味</th>
+    </tr>
+    <tr>
+      <td><button class="pb" onclick="openPopup('alu')">💡 ALU（演算装置）</button></td>
+      <td>Arithmetic and Logic Unit</td>
+      <td>
+        <button class="pb" onclick="openPopup('arithmetic')">💡 Arithmetic</button>＝算術・計算　
+        <button class="pb" onclick="openPopup('logic')">💡 Logic</button>＝論理　
+        Unit＝装置
+      </td>
+    </tr>
+    <tr>
+      <td><button class="pb" onclick="openPopup('cu')">💡 CU（制御装置）</button></td>
+      <td>Control Unit</td>
+      <td>
+        <button class="pb" onclick="openPopup('control')">💡 Control</button>＝制御・管理　
+        Unit＝装置
+      </td>
+    </tr>
+  </table>
+
+  <!-- IoT・アクチュエータ（ポップアップ）-->
+  <div class="sec-h2">▶ 関連用語</div>
+  <p>
+    <button class="pb" onclick="openPopup('iot')">💡 IoT</button>
+    <button class="pb" onclick="openPopup('actuator')">💡 アクチュエータ</button>
+  </p>
+
+  <!-- CPUとは ボックス -->
+  <div class="cpu-box">
+    <div class="cpu-box-title"><span class="icon">🔗</span> CPU とは</div>
+    <p><strong>CPU（【中央処理装置】）</strong>＝ Central Processing Unit の略です。</p>
+    <p>CPU の中に「<span class="dz" data-ans="演算装置" data-id="cpu1">　　　　</span>」と「<span class="dz" data-ans="制御装置" data-id="cpu2">　　　　</span>」の両方が入っています。</p>
+    <p>CPU は「コンピュータの頭脳」とも呼ばれます。</p>
+    <p style="margin-top:6px;">
+      <button class="pb" onclick="openPopup('cpu')">💡 CPU（Central Processing Unit）</button>
+    </p>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══ popup data ══ -->
+<script>
+const POPUP_DATA = {
+  hardware: {
+    title:   "ハードウェア（hardware）",
+    english: "",
+    meaning: "",
+    body:    "コンピュータを構成する物理的な装置・部品のことです。目で見て手で触れるものがすべてハードウェアです。",
+    example: "例：CPU・メモリ・キーボード・マウス・ディスプレイ・HDD・SSDなど"
+  },
+  software: {
+    title:   "ソフトウェア（software）",
+    english: "",
+    meaning: "",
+    body:    "コンピュータを動かす仕組み・プログラムのことです。大きく「OS（基本ソフトウェア）」と「アプリ（応用ソフトウェア）」に分かれます。",
+    example: "例：Windows・macOS・Android（OS）、Word・Chrome・ゲームアプリ（アプリ）"
+  },
+  os: {
+    title:   "OS（オーエス）",
+    english: "OS ＝ Operating System（基本ソフトウェア）",
+    meaning: "",
+    body:    "ハードウェアとアプリの橋渡しをする基盤となるソフトウェアです。ファイル管理・メモリ管理・入出力管理などを担います。",
+    example: "例：Windows・macOS（パソコン）　iOS・Android（スマートフォン）"
+  },
+  alu: {
+    title:   "ALU（演算装置）",
+    english: "ALU ＝ Arithmetic and Logic Unit",
+    meaning: "Arithmetic（算術・計算）　and　Logic（論理）　Unit（装置）",
+    body:    "四則演算（＋－×÷）やデータの比較・論理演算（AND・OR・NOT）を実際に行うCPUの「計算エンジン」です。",
+    example: ""
+  },
+  cu: {
+    title:   "CU（制御装置）",
+    english: "CU ＝ Control Unit",
+    meaning: "Control（制御・管理）　Unit（装置）",
+    body:    "プログラムから命令を取り出し（フェッチ）、解釈（デコード）して、ALUやメモリなど各装置に「次はこれをしなさい」と指示を出す司令塔です。",
+    example: "CPU ＝ 制御装置（CU）＋ 演算装置（ALU）"
+  },
+  cpu: {
+    title:   "CPU（中央処理装置）",
+    english: "CPU ＝ Central Processing Unit",
+    meaning: "Central（中央）　Processing（処理）　Unit（装置）",
+    body:    "CPU の中に「制御装置（CU）」と「演算装置（ALU）」の両方が入っています。「コンピュータの頭脳」とも呼ばれます。",
+    example: "例：Intel Core i9・AMD Ryzen 9・Apple M4（スマホ・パソコン用CPU）"
+  },
+  arithmetic: {
+    title:   "Arithmetic（アリスメティック）",
+    english: "",
+    meaning: "意味：算術・計算",
+    body:    "数の計算（足し算・引き算・掛け算・割り算）に関わることを表す英単語です。ALUの「A」はこの単語の頭文字です。",
+    example: ""
+  },
+  logic: {
+    title:   "Logic（ロジック）",
+    english: "",
+    meaning: "意味：論理",
+    body:    "AND・OR・NOTのような論理演算に関わることを表す英単語です。ALUの「L」はこの単語の頭文字です。",
+    example: ""
+  },
+  control: {
+    title:   "Control（コントロール）",
+    english: "",
+    meaning: "意味：制御・管理・支配",
+    body:    "指示を出して動作を管理することを表す英単語です。CUの「C」はこの単語の頭文字です。",
+    example: ""
+  },
+  iot: {
+    title:   "IoT（アイオーティー）",
+    english: "IoT ＝ Internet of Things（モノのインターネット）",
+    meaning: "",
+    body:    "家電・車・センサなど身の回りの「モノ」がインターネットに繋がり、データをやり取りするしくみです。",
+    example: "例：スマート家電（自動ON/OFF）・自動運転・工場の設備管理・スマート農業など"
+  },
+  actuator: {
+    title:   "アクチュエータ（actuator）",
+    english: "英語の act（動かす）が語源",
+    meaning: "",
+    body:    "コンピュータからの電気信号を物理的な動きに変える装置です。センサが「情報を取り込む」のに対し、アクチュエータは「動作を起こす」はたらきをします。\n\nセンサ　　　物理世界 → コンピュータ（情報を取り込む）\nアクチュエータ　コンピュータ → 物理世界（動作を起こす）",
+    example: "例：モーター（回転）・スピーカー（音）・LEDライト（光）・エアコンのコンプレッサー"
+  },
+};
+
+function openPopup(key) {
+  const d = POPUP_DATA[key]; if (!d) return;
+  document.getElementById('popupTitle').textContent = d.title;
+  const eng = document.getElementById('popupEnglish');
+  eng.textContent = d.english; eng.style.display = d.english ? '' : 'none';
+  const mn = document.getElementById('popupMeaning');
+  mn.textContent = d.meaning; mn.style.display = d.meaning ? '' : 'none';
+  document.getElementById('popupBody').textContent = d.body;
+  const ex = document.getElementById('popupExample');
+  if (d.example) { ex.textContent = '📌 ' + d.example; ex.style.display = ''; }
+  else { ex.style.display = 'none'; }
+  document.getElementById('popupModal').classList.add('show');
+}
+function closePopup(e) {
+  if (!e || e.target === document.getElementById('popupModal'))
+    document.getElementById('popupModal').classList.remove('show');
+}
+
+// ════════════════════════════
+//  穴埋め（空欄4か所）
+//  制御装置×2・演算装置×2
+// ════════════════════════════
+const WORDS = ["制御装置", "演算装置", "制御装置", "演算装置"];
+
+let selectedWord = null, isRunning = false, startTime = null, timerInt = null, bestTime = null;
+
+function fmtTime(ms) {
+  const m = Math.floor(ms/60000).toString().padStart(2,'0');
+  const s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
+  return `${m}:${s}.${Math.floor((ms%1000)/100)}`;
+}
+
+function startChallenge() {
+  document.querySelectorAll('.dz').forEach(z => { z.textContent='　　'; z.classList.remove('correct','wrong'); });
+  selectedWord = null;
+  // 語句バンクは重複を含めて4枚
+  renderWordBank([...WORDS].sort(()=>Math.random()-.5));
+  clearInterval(timerInt);
+  startTime = Date.now(); isRunning = true;
+  timerInt = setInterval(()=>{ document.getElementById('timerDisplay').textContent = fmtTime(Date.now()-startTime); }, 100);
+}
+
+function renderWordBank(words) {
+  const wb = document.getElementById('wordBank'); wb.innerHTML='';
+  words.forEach(w => wb.appendChild(makeItem(w)));
+}
+
+function makeItem(w) {
+  const el = document.createElement('span');
+  el.className = 'drag-item'; el.textContent = w;
+  el.onclick = () => {
+    document.querySelectorAll('.drag-item').forEach(d=>d.classList.remove('selected'));
+    if (selectedWord===w && el.classList.contains('selected')===false) { /* 同語句の別カードを選ぶ場合 */ }
+    el.classList.add('selected'); selectedWord = w;
+  };
+  return el;
+}
+
+document.querySelectorAll('.dz').forEach(z => {
+  z.addEventListener('click', () => {
+    if (!isRunning) return;
+    if (selectedWord) {
+      z.textContent = selectedWord; z.classList.remove('correct','wrong');
+      const found = [...document.querySelectorAll('#wordBank .drag-item')].find(i=>i.textContent===selectedWord && i.classList.contains('selected'));
+      if (found) found.remove();
+      else {
+        const any = [...document.querySelectorAll('#wordBank .drag-item')].find(i=>i.textContent===selectedWord);
+        if (any) any.remove();
+      }
+      selectedWord = null; document.querySelectorAll('.drag-item').forEach(d=>d.classList.remove('selected'));
+    } else if (z.textContent.trim().replace(/　/g,'')) {
+      const word = z.textContent.trim(); z.textContent='　　'; z.classList.remove('correct','wrong');
+      document.getElementById('wordBank').appendChild(makeItem(word));
+    }
+  });
+});
+
+function checkAnswers() {
+  if (!isRunning) return;
+  let allOk = true;
+  document.querySelectorAll('.dz').forEach(z => {
+    const input = z.textContent.trim().replace(/　/g,'');
+    if (!input) { allOk = false; return; }
+    if (input === z.dataset.ans) { z.classList.add('correct'); z.classList.remove('wrong'); }
+    else { z.classList.add('wrong'); z.classList.remove('correct'); allOk = false; }
+  });
+  if (allOk) {
+    clearInterval(timerInt); isRunning = false;
+    const elapsed = Date.now() - startTime;
+    if (bestTime===null||elapsed<bestTime) {
+      bestTime = elapsed;
+      document.getElementById('recordDisplay').textContent = '🏆 ベスト：' + fmtTime(bestTime);
+    }
+    startConfetti();
+  } else {
+    const wbc = document.getElementById('wordBankContainer');
+    wbc.classList.remove('shake'); void wbc.offsetWidth; wbc.classList.add('shake');
+    setTimeout(()=>wbc.classList.remove('shake'), 500);
+  }
+}
+
+function showModel() {
+  clearInterval(timerInt); isRunning = false; selectedWord = null;
+  document.querySelectorAll('.dz').forEach(z=>{ z.textContent=z.dataset.ans; z.classList.remove('correct','wrong'); });
+  document.getElementById('wordBank').innerHTML='<span style="color:#888;font-size:.9em;">お手本表示中。「チャレンジ開始」で練習できます。</span>';
+  document.getElementById('timerDisplay').textContent='00:00.0';
+}
+
+// confetti
+const cvs=document.getElementById('confetti-canvas'), ctx=cvs.getContext('2d');
+let pts=[], cnfOn=false;
+function startConfetti() {
+  cvs.width=window.innerWidth; cvs.height=window.innerHeight; pts=[];
+  for(let i=0;i<200;i++) pts.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height-cvs.height,s:Math.random()*9+4,c:`hsl(${Math.random()*360},75%,65%)`,sp:Math.random()*3+2});
+  cnfOn=true; animCnf();
+  setTimeout(()=>{cnfOn=false;ctx.clearRect(0,0,cvs.width,cvs.height);pts=[];},4000);
+}
+function animCnf() {
+  if(!cnfOn)return;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  pts.forEach(p=>{p.y+=p.sp;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s);if(p.y>cvs.height)p.y=-20;});
+  requestAnimationFrame(animCnf);
+}
+
+showModel();
+</script>
+</body>
+</html>

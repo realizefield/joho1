@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>情報Ⅰ：演習問題（第2章）</title>
+  <style>
+    :root {
+      --primary: #185FA5;
+      --teal:    #0F6E56;
+      --amber:   #BA7517;
+      --coral:   #993C1D;
+      --green:   #155724;
+      --red:     #721c24;
+      --gray:    #5F5E5A;
+      --bg:      #f5f7fa;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Yu Gothic","游ゴシック",sans-serif; background: var(--bg); margin: 0; padding: 0; font-size: 14px; line-height: 1.9; color: #222; }
+
+    /* ── nav ── */
+    .page-nav { max-width: 1050px; margin: 0 auto 6px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+    .nav-btn { text-decoration: none; background: #7f8c8d; color: #fff; padding: 5px 13px; border-radius: 4px; font-size: .78em; font-weight: bold; transition: .2s; }
+    .nav-btn:hover { background: #34495e; }
+    .nav-btn.active { background: var(--primary); border: 2px solid #f1c40f; }
+
+    /* ── page header ── */
+    .page-header { max-width: 1050px; margin: 20px auto 0; padding: 0 16px; }
+    .page-header h1 { font-size: 1.3em; color: var(--primary); border-left: 6px solid var(--primary); padding-left: 12px; margin: 0 0 4px; }
+    .page-header p  { color: #555; margin: 0 0 16px; font-size: .9em; }
+
+    /* ── score bar ── */
+    .score-bar { max-width: 1050px; margin: 0 auto 12px; padding: 0 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .score-display { background: #fff; border: 2px solid var(--primary); border-radius: 8px; padding: 6px 20px; font-weight: bold; color: var(--primary); font-size: 1em; }
+    .score-all-btn { background: var(--primary); color: #fff; border: none; cursor: pointer; padding: 7px 18px; border-radius: 6px; font-weight: bold; font-size: .88em; transition: .2s; }
+    .score-all-btn:hover { background: #0d3e6e; }
+    .reset-all-btn { background: #eee; color: #555; border: none; cursor: pointer; padding: 7px 18px; border-radius: 6px; font-weight: bold; font-size: .88em; transition: .2s; }
+    .reset-all-btn:hover { background: #ddd; }
+
+    /* ── container ── */
+    .container { max-width: 1050px; margin: 0 auto 40px; padding: 0 16px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* ── question card ── */
+    .q-card { background: #fff; border: 1.5px solid #ddd; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .q-card-head { background: var(--primary); color: #fff; padding: 9px 18px; font-weight: bold; font-size: .95em; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .q-badge { background: rgba(255,255,255,.22); border-radius: 4px; padding: 2px 10px; font-size: .8em; }
+    .q-card-body { padding: 16px 20px; }
+
+    /* ── question text ── */
+    .q-text { font-size: .95em; line-height: 2; margin-bottom: 12px; }
+    .q-text ul, .q-text ol { margin: 6px 0 6px 20px; padding: 0; }
+    .q-text li { margin-bottom: 3px; }
+
+    /* ── choice table (問題1) ── */
+    .choice-table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: .88em; }
+    .choice-table th { background: var(--primary); color: #fff; padding: 7px 10px; text-align: center; }
+    .choice-table td { padding: 7px 10px; border: 1px solid #ddd; text-align: center; }
+    .choice-table tr:nth-child(even) td { background: #f0f4fa; }
+
+    /* ── radio choices（単一選択）── */
+    .radio-choices { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+    .radio-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 14px; border: 1.5px solid #ddd; border-radius: 7px;
+      cursor: pointer; transition: .15s; font-size: .92em;
+    }
+    .radio-item:hover { background: #f0f4fa; border-color: var(--primary); }
+    .radio-item.selected { background: #eaf0fb; border-color: var(--primary); }
+    .radio-item.correct  { background: #d4edda; border-color: #28a745; }
+    .radio-item.wrong    { background: #f8d7da; border-color: #dc3545; }
+    .radio-item.reveal   { background: #d4edda; border-color: #28a745; }
+    .ri-num { font-weight: bold; color: var(--primary); min-width: 22px; flex-shrink: 0; }
+
+    /* ── combo choices（①〜④）── */
+    .combo-choices { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+    .combo-btn {
+      border: 2px solid var(--primary); background: #fff; color: var(--primary);
+      padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: .95em; transition: .15s;
+    }
+    .combo-btn:hover { background: #eaf0fb; }
+    .combo-btn.selected { background: var(--primary); color: #fff; }
+    .combo-btn.correct  { background: #d4edda; border-color: #28a745; color: var(--green); }
+    .combo-btn.wrong    { background: #f8d7da; border-color: #dc3545; color: var(--red); }
+    .combo-btn.reveal   { background: #d4edda; border-color: #28a745; color: var(--green); }
+
+    /* ── checkbox choices（複数選択）── */
+    .check-choices { display: flex; flex-direction: column; gap: 7px; margin: 10px 0; }
+    .check-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 14px; border: 1.5px solid #ddd; border-radius: 7px;
+      cursor: pointer; transition: .15s; font-size: .92em; user-select: none;
+    }
+    .check-item:hover { background: #f0f4fa; }
+    .check-item.selected { background: #eaf0fb; border-color: var(--primary); }
+    .check-item.correct  { background: #d4edda; border-color: #28a745; }
+    .check-item.wrong    { background: #f8d7da; border-color: #dc3545; }
+    .check-item.reveal   { background: #d4edda; border-color: #28a745; }
+    .check-item .ck-box { width: 18px; height: 18px; border: 2px solid #aaa; border-radius: 4px; margin-top: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .85em; }
+    .check-item.selected .ck-box { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .check-item.correct  .ck-box { border-color: #28a745; background: #28a745; color: #fff; }
+    .check-item.wrong    .ck-box { border-color: #dc3545; background: #dc3545; color: #fff; }
+    .check-item.reveal   .ck-box { border-color: #28a745; background: #28a745; color: #fff; }
+    .ck-key { font-weight: bold; color: var(--primary); min-width: 20px; }
+
+    /* ── btn row ── */
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .btn { border: none; cursor: pointer; padding: 8px 20px; border-radius: 6px; font-weight: bold; font-size: .88em; transition: .2s; }
+    .btn-check  { background: var(--primary); color: #fff; }
+    .btn-check:hover  { background: #0d3e6e; }
+    .btn-hint   { background: #f39c12; color: #fff; }
+    .btn-hint:hover   { background: #d68910; }
+    .btn-reset  { background: #eee; color: #555; }
+    .btn-reset:hover  { background: #ddd; }
+
+    /* ── hint ── */
+    .hint-box { display: none; margin-top: 10px; background: #fffbea; border: 1.5px solid #f1c40f; border-left: 5px solid #f39c12; border-radius: 0 6px 6px 0; padding: 10px 16px; }
+    .hint-box.show { display: block; }
+    .hint-title { font-weight: bold; color: #8B6914; margin-bottom: 5px; font-size: .88em; }
+    .hint-box p { margin: 3px 0; font-size: .88em; color: #444; }
+
+    /* ── result / explain ── */
+    .result-box { display: none; margin-top: 10px; padding: 12px 16px; border-radius: 6px; font-size: .9em; }
+    .result-box.show { display: block; }
+    .result-box.ok  { background: #d4edda; border: 1.5px solid #28a745; }
+    .result-box.ng  { background: #f8d7da; border: 1.5px solid #dc3545; }
+    .result-box .r-title { font-weight: bold; margin-bottom: 4px; }
+
+    .explain-box { display: none; margin-top: 10px; background: #eff5fc; border: 1.5px solid #aed6f1; border-left: 5px solid var(--primary); border-radius: 0 6px 6px 0; padding: 14px 16px; }
+    .explain-box.show { display: block; }
+    .ex-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: .92em; }
+    .explain-box p { margin: 4px 0; font-size: .88em; color: #333; line-height: 1.85; }
+    .mark-ok { color: #155724; font-weight: bold; }
+    .mark-ng { color: #721c24; font-weight: bold; }
+
+    /* 用語解説ボックス（問題4の関連語）*/
+    .term-box { background: #f8fbff; border: 1.5px solid #aed6f1; border-radius: 8px; padding: 14px 18px; margin-top: 10px; }
+    .term-box-title { font-weight: bold; color: var(--primary); font-size: .9em; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    .term-entry { margin-bottom: 12px; }
+    .term-entry:last-child { margin-bottom: 0; }
+    .term-name { font-weight: bold; color: var(--teal); font-size: .92em; margin-bottom: 2px; }
+    .term-en   { font-family: monospace; font-size: .88em; color: var(--primary); }
+    .term-body { font-size: .88em; color: #333; line-height: 1.8; }
+
+    /* ── score panel ── */
+    .score-panel { background: #fff; border: 2px solid var(--primary); border-radius: 12px; padding: 24px; text-align: center; display: none; }
+    .score-panel.show { display: block; }
+    .score-panel h2 { color: var(--primary); margin: 0 0 10px; }
+    .score-num { font-size: 2.8em; font-weight: bold; color: var(--primary); }
+    .score-comment { margin-top: 10px; font-size: 1em; }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+
+    @media (max-width: 600px) {
+      .q-card-body { padding: 12px; }
+      .combo-btn { padding: 7px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- nav -->
+    <div class="page-nav">
+    <a class="nav-btn" href="joho1.html">📖 第1章　コンピュータのしくみ</a>
+    <a class="nav-btn" href="joho1-1.html">✏️ 第1章　演習問題</a>
+    <a class="nav-btn" href="joho2.html">📖 第2章　構成(1)</a>
+    <a class="nav-btn" href="joho3.html">📖 第2章　構成(2)</a>
+    <a class="nav-btn active" href="joho4.html">✏️ 第2章　演習問題</a>
+  </div>
+
+<div class="page-header">
+  <h1>演習問題　― コンピュータの構成 ―</h1>
+  <p>全8問。各問題に答えて「答え合わせ」を押してください。わからないときは「ヒント」を活用しましょう。</p>
+</div>
+
+<div class="score-bar">
+  <div class="score-display" id="scoreDisplay">0 / 8 問正解</div>
+  <button class="score-all-btn" onclick="checkAll()">✓ 全問一括採点</button>
+  <button class="reset-all-btn" onclick="resetAll()">↺ 全問リセット</button>
+</div>
+
+<div class="container">
+
+<!-- ══════════════════════════════
+     問題 1　組み合わせ選択
+══════════════════════════════ -->
+<div class="q-card" id="q1-card">
+  <div class="q-card-head">
+    <span>問題 1</span><span class="q-badge">組み合わせ選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">
+      コンピュータの5大装置と動作サイクルについて、次の空欄（ア）〜（オ）に当てはまる語句の組み合わせとして正しいものを①〜④から１つ選べ。
+      <ul>
+        <li>CPU は（ア）と（イ）をまとめた呼び名である。</li>
+        <li>（ア）はプログラムの命令を読み出し、各装置に指示を出す司令塔である。</li>
+        <li>（イ）は四則演算や論理演算を実際に行う。英語名は（ウ）である。</li>
+        <li>CPU がメモリから命令を読み出すステップを（エ）、演算結果をメモリに書き戻すステップを（オ）という。</li>
+      </ul>
+    </div>
+    <table class="choice-table">
+      <tr><th></th><th>（ア）</th><th>（イ）</th><th>（ウ）</th><th>（エ）</th><th>（オ）</th></tr>
+      <tr><td><b>①</b></td><td>制御装置</td><td>演算装置</td><td>ALU</td><td>フェッチ</td><td>ライトバック</td></tr>
+      <tr><td><b>②</b></td><td>演算装置</td><td>制御装置</td><td>CU</td><td>デコード</td><td>フェッチ</td></tr>
+      <tr><td><b>③</b></td><td>制御装置</td><td>演算装置</td><td>CU</td><td>フェッチ</td><td>デコード</td></tr>
+      <tr><td><b>④</b></td><td>演算装置</td><td>制御装置</td><td>ALU</td><td>ライトバック</td><td>デコード</td></tr>
+    </table>
+    <div class="combo-choices" id="q1-ch">
+      <button class="combo-btn" data-v="1" onclick="selCombo('q1',this)">①</button>
+      <button class="combo-btn" data-v="2" onclick="selCombo('q1',this)">②</button>
+      <button class="combo-btn" data-v="3" onclick="selCombo('q1',this)">③</button>
+      <button class="combo-btn" data-v="4" onclick="selCombo('q1',this)">④</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q1','1')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q1-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q1')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q1-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● 「司令塔」＝ Control Unit（CU）＝ 制御装置</p>
+      <p>● 「計算エンジン」＝ Arithmetic and Logic Unit（ALU）＝ 演算装置</p>
+      <p>● 動作サイクルの順：「取ってくる → 解読する → 計算する → 書き戻す」</p>
+      <p>● fetch＝取ってくる　write-back＝書き戻す</p>
+    </div>
+    <div class="result-box" id="q1-res"></div>
+    <div class="explain-box" id="q1-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>正解：①</b>　（ア）<span class="mark-ok">制御装置＝CU</span>　（イ）<span class="mark-ok">演算装置＝ALU</span>　（ウ）<span class="mark-ok">ALU</span>　（エ）<span class="mark-ok">フェッチ</span>　（オ）<span class="mark-ok">ライトバック</span></p>
+      <p>動作サイクルは <b>フェッチ → デコード → 実行 → ライトバック</b> の順です。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 2　単一選択
+══════════════════════════════ -->
+<div class="q-card" id="q2-card">
+  <div class="q-card-head">
+    <span>問題 2</span><span class="q-badge">単一選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">スマートフォンに内蔵されているセンサを使ったアプリケーションの説明として、最も適切なものを１つ選べ。</div>
+    <div class="radio-choices" id="q2-ch">
+      <div class="radio-item" data-v="1" onclick="selRadio('q2',this)"><span class="ri-num">①</span>歩数計アプリは、加速度センサを利用して体の動きを検出し、歩数をカウントしている。</div>
+      <div class="radio-item" data-v="2" onclick="selRadio('q2',this)"><span class="ri-num">②</span>地図アプリで現在地を表示するには、近接センサだけあれば十分である。</div>
+      <div class="radio-item" data-v="3" onclick="selRadio('q2',this)"><span class="ri-num">③</span>明るさに応じて画面の輝度を自動調整する機能は、ジャイロセンサを使っている。</div>
+      <div class="radio-item" data-v="4" onclick="selRadio('q2',this)"><span class="ri-num">④</span>指紋認証は、温度センサを利用して指の形を読み取っている。</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q2','1')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q2-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q2')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q2-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● 加速度センサ：体の動き（加速度の変化）を検出する</p>
+      <p>● 現在地表示：GPS（測位センサ）が必要</p>
+      <p>● 画面輝度の自動調整：光センサ（照度センサ）が担当</p>
+      <p>● 指紋認証：指紋センサ（光学式または静電容量式）を使用</p>
+    </div>
+    <div class="result-box" id="q2-res"></div>
+    <div class="explain-box" id="q2-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>正解：①</b></p>
+      <p><span class="mark-ok">①正しい。</span>加速度センサは体の動き（加速度の変化）を検出します。</p>
+      <p><span class="mark-ng">②誤り。</span>現在地表示にはGPS（測位センサ）が必要です。</p>
+      <p><span class="mark-ng">③誤り。</span>画面輝度調整は<b>光センサ（照度センサ）</b>が担当します。</p>
+      <p><span class="mark-ng">④誤り。</span>指紋認証は<b>指紋センサ</b>（光学式または静電容量式）を使います。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 3　単一選択
+══════════════════════════════ -->
+<div class="q-card" id="q3-card">
+  <div class="q-card-head">
+    <span>問題 3</span><span class="q-badge">単一選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">コンピュータの5大装置のうち、「制御装置」の役割として正しいものを１つ選べ。</div>
+    <div class="radio-choices" id="q3-ch">
+      <div class="radio-item" data-v="1" onclick="selRadio('q3',this)"><span class="ri-num">①</span>四則演算や論理演算を実際に計算する。</div>
+      <div class="radio-item" data-v="2" onclick="selRadio('q3',this)"><span class="ri-num">②</span>プログラムの命令を読み出し、各装置に指示を出す。</div>
+      <div class="radio-item" data-v="3" onclick="selRadio('q3',this)"><span class="ri-num">③</span>データやプログラムを一時的または永久的に保存する。</div>
+      <div class="radio-item" data-v="4" onclick="selRadio('q3',this)"><span class="ri-num">④</span>キーボードやマウスからデータをコンピュータに送り込む。</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q3','2')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q3-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q3')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q3-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● ①は演算装置（ALU）の役割</p>
+      <p>● ③は記憶装置の役割</p>
+      <p>● ④は入力装置の役割</p>
+      <p>● CU＝Control Unit＝「司令塔」がキーワード</p>
+    </div>
+    <div class="result-box" id="q3-res"></div>
+    <div class="explain-box" id="q3-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>正解：②</b></p>
+      <p>制御装置（CU）はプログラムの命令を順番に読み出し、演算装置・記憶装置などへ指示を出す司令塔です。</p>
+      <p><span class="mark-ng">①</span>はALU（演算装置）、<span class="mark-ng">③</span>は記憶装置、<span class="mark-ng">④</span>は入力装置の説明です。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 4　組み合わせ選択（不揮発性）
+══════════════════════════════ -->
+<div class="q-card" id="q4-card">
+  <div class="q-card-head">
+    <span>問題 4</span><span class="q-badge">組み合わせ選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">
+      次のa〜dの記憶媒体のうち、電源を切ってもデータが消えない「不揮発性」の媒体をすべて選んだ組み合わせとして正しいものを１つ選べ。
+      <ul style="list-style:none;padding-left:0;">
+        <li>a. SSD（ソリッドステートドライブ）</li>
+        <li>b. DRAM（主記憶に使われるRAM）</li>
+        <li>c. フラッシュメモリ（USBメモリなど）</li>
+        <li>d. SRAM（キャッシュメモリに使われるRAM）</li>
+      </ul>
+    </div>
+    <div class="combo-choices" id="q4-ch">
+      <button class="combo-btn" data-v="1" onclick="selCombo('q4',this)">① a, b</button>
+      <button class="combo-btn" data-v="2" onclick="selCombo('q4',this)">② a, c</button>
+      <button class="combo-btn" data-v="3" onclick="selCombo('q4',this)">③ b, d</button>
+      <button class="combo-btn" data-v="4" onclick="selCombo('q4',this)">④ a, b, c</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q4','2')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q4-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q4')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q4-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● 不揮発性＝電源を切ってもデータが消えない</p>
+      <p>● DRAM：コンデンサで記憶→常にリフレッシュが必要→揮発性</p>
+      <p>● SRAM：フリップフロップで記憶→電源停止で消える→揮発性</p>
+      <p>● SSD・フラッシュメモリ：絶縁体で電子を閉じ込める→不揮発性</p>
+    </div>
+    <div class="result-box" id="q4-res"></div>
+    <div class="explain-box" id="q4-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>正解：②（a と c）</b></p>
+      <p>SSDとフラッシュメモリは<b>不揮発性</b>（電源を切ってもデータが消えない）です。</p>
+      <p>DRAMとSRAMはどちらも<b>揮発性</b>で、電源を切るとデータが失われます。</p>
+      <p style="margin-top:6px;"><b>DRAM</b>：コンデンサに電荷を蓄えて記憶。D＝Dynamic（動的）。例：パソコンのメモリ棒（DDR5）</p>
+      <p><b>SRAM</b>：フリップフロップ回路で記憶。S＝Static（静的）。例：CPUのL1/L2/L3キャッシュ</p>
+      <p>💡 RAM（揮発性）は「作業台」、SSD（不揮発性）は「棚」。Ctrl+Sで保存するのは作業台のものを棚に移す操作です。</p>
+      <!-- 用語解説（インターフェース・HDMI・IrDA） -->
+      <div class="term-box" style="margin-top:12px;">
+        <div class="term-box-title">▶ 用語解説（練習問題4の関連語）</div>
+        <div class="term-entry">
+          <div class="term-name">インターフェース（interface）</div>
+          <div class="term-body">英語の inter（〜の間）＋ face（接する面）で、「接続部分・境界面」という意味です。コンピュータと外部機器をつなぐための規格・コネクタ・端子の総称です。<br>具体例：USBポート、HDMIコネクタ、イヤホンジャック（3.5mm端子）、LANポート（Ethernet）など。</div>
+        </div>
+        <div class="term-entry">
+          <div class="term-name">HDMI</div>
+          <div class="term-en">High-Definition Multimedia Interface</div>
+          <div class="term-body">High-Definition＝高精細（HD画質）　Multimedia＝映像・音声などをまとめて扱う<br>映像と音声を１本のケーブルで同時に送れるデジタル接続規格です。テレビ・ゲーム機・DVDプレーヤー・パソコンをつなぐ規格として広く普及しています。著作権保護（HDCP）機能も内蔵しています。</div>
+        </div>
+        <div class="term-entry">
+          <div class="term-name">IrDA</div>
+          <div class="term-en">Infrared Data Association</div>
+          <div class="term-body">Infrared＝赤外線（infrared＝「赤より外側」の光、人間の目には見えない）　Data Association＝データ通信の業界団体名<br>赤外線を使った近距離無線通信の規格です。ケーブルなしでデータを送受信できますが、通信できる距離は約1m以内と短く、送受信機器を正面に向き合わせる必要があります。現在はBluetoothやWi-Fiに置き換えられ、あまり使われなくなっています。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 5　単一選択
+══════════════════════════════ -->
+<div class="q-card" id="q5-card">
+  <div class="q-card-head">
+    <span>問題 5</span><span class="q-badge">単一選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">コンピュータの5大装置のうち、四則演算やデータの比較・判断を行う装置はどれですか。</div>
+    <div class="radio-choices" id="q5-ch">
+      <div class="radio-item" data-v="1" onclick="selRadio('q5',this)"><span class="ri-num">①</span>制御装置</div>
+      <div class="radio-item" data-v="2" onclick="selRadio('q5',this)"><span class="ri-num">②</span>記憶装置</div>
+      <div class="radio-item" data-v="3" onclick="selRadio('q5',this)"><span class="ri-num">③</span>演算装置</div>
+      <div class="radio-item" data-v="4" onclick="selRadio('q5',this)"><span class="ri-num">④</span>入力装置</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q5','3')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q5-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q5')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q5-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● ALU＝Arithmetic（算術）and Logic（論理）Unit</p>
+      <p>● 「算術」＝四則演算、「論理」＝比較・判断</p>
+    </div>
+    <div class="result-box" id="q5-res"></div>
+    <div class="explain-box" id="q5-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>答え：③ 演算装置</b></p>
+      <p>演算装置（ALU：Arithmetic and Logic Unit）は四則演算やデータの比較・論理演算を実際に行うCPUの「計算エンジン」です。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 6　複数選択
+══════════════════════════════ -->
+<div class="q-card" id="q6-card">
+  <div class="q-card-head">
+    <span>問題 6</span><span class="q-badge">複数選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">次のうち、補助記憶装置に分類されるものをすべて選びなさい。</div>
+    <div class="check-choices" id="q6-ch">
+      <div class="check-item" data-v="a" onclick="togCheck(this)">
+        <div class="ck-box"></div><span class="ck-key">a.</span>DRAM
+      </div>
+      <div class="check-item" data-v="b" onclick="togCheck(this)">
+        <div class="ck-box"></div><span class="ck-key">b.</span>SSD
+      </div>
+      <div class="check-item" data-v="c" onclick="togCheck(this)">
+        <div class="ck-box"></div><span class="ck-key">c.</span>DVD
+      </div>
+      <div class="check-item" data-v="d" onclick="togCheck(this)">
+        <div class="ck-box"></div><span class="ck-key">d.</span>SRAM
+      </div>
+      <div class="check-item" data-v="e" onclick="togCheck(this)">
+        <div class="ck-box"></div><span class="ck-key">e.</span>フラッシュメモリ
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkMulti('q6',['b','c','e'])">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q6-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q6')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q6-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● 主記憶装置（メインメモリ）＝ RAM（DRAM・SRAM）</p>
+      <p>● 補助記憶装置（ストレージ）＝ 大容量・不揮発性</p>
+      <p>● SSD・DVD・フラッシュメモリはどれに分類される？</p>
+    </div>
+    <div class="result-box" id="q6-res"></div>
+    <div class="explain-box" id="q6-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>答え：b・c・e（SSD、DVD、フラッシュメモリ）</b></p>
+      <p>補助記憶装置は大容量のデータを恒久的に保存する装置です。不揮発性（電源を切っても消えない）のものが該当します。</p>
+      <p><span class="mark-ng">a. DRAM</span>：主記憶装置（揮発性）　<span class="mark-ng">d. SRAM</span>：主記憶装置のキャッシュ（揮発性）</p>
+      <p><span class="mark-ok">b. SSD</span>・<span class="mark-ok">c. DVD</span>・<span class="mark-ok">e. フラッシュメモリ</span>：補助記憶装置（不揮発性）</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 7　単一選択
+══════════════════════════════ -->
+<div class="q-card" id="q7-card">
+  <div class="q-card-head">
+    <span>問題 7</span><span class="q-badge">単一選択</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">スマートフォンで地図アプリを使うとき、現在の向きを検知するために使われるセンサはどれですか。</div>
+    <div class="radio-choices" id="q7-ch">
+      <div class="radio-item" data-v="1" onclick="selRadio('q7',this)"><span class="ri-num">①</span>温度センサ</div>
+      <div class="radio-item" data-v="2" onclick="selRadio('q7',this)"><span class="ri-num">②</span>磁気センサ（地磁気センサ）</div>
+      <div class="radio-item" data-v="3" onclick="selRadio('q7',this)"><span class="ri-num">③</span>近接センサ</div>
+      <div class="radio-item" data-v="4" onclick="selRadio('q7',this)"><span class="ri-num">④</span>光センサ</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q7','2')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q7-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q7')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q7-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● 向き・方位を検知するには地磁気（地球の磁場）を利用します</p>
+      <p>● コンパス（方位磁石）と同じ原理のセンサはどれ？</p>
+      <p>● ジャイロセンサは「回転・傾き」、近接センサは「物体の近さ」を計測します</p>
+    </div>
+    <div class="result-box" id="q7-res"></div>
+    <div class="explain-box" id="q7-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>答え：② 磁気センサ（地磁気センサ）</b></p>
+      <p>地磁気センサは地球の磁場を検知してコンパス（方位磁石）機能を実現します。地図アプリで現在の向きを表示するのに使われます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     問題 8　単一選択（該当しないもの）
+══════════════════════════════ -->
+<div class="q-card" id="q8-card">
+  <div class="q-card-head">
+    <span>問題 8</span><span class="q-badge">単一選択（誤りを選ぶ）</span>
+  </div>
+  <div class="q-card-body">
+    <div class="q-text">コンピュータを構成するハードウェアの働きとして、該当しないものを１つ選べ。</div>
+    <div class="radio-choices" id="q8-ch">
+      <div class="radio-item" data-v="1" onclick="selRadio('q8',this)"><span class="ri-num">①</span>キーボードは文字コードや制御信号を入力する</div>
+      <div class="radio-item" data-v="2" onclick="selRadio('q8',this)"><span class="ri-num">②</span>D/A変換された音声信号をスピーカーに出力する</div>
+      <div class="radio-item" data-v="3" onclick="selRadio('q8',this)"><span class="ri-num">③</span>アクチュエータはコード化された命令で記述する</div>
+      <div class="radio-item" data-v="4" onclick="selRadio('q8',this)"><span class="ri-num">④</span>ハードディスクは不揮発性の記憶装置の働きをする</div>
+      <div class="radio-item" data-v="5" onclick="selRadio('q8',this)"><span class="ri-num">⑤</span>マウスはポインティングデバイスの動きをする</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkQ('q8','3')">✓ 答え合わせ</button>
+      <button class="btn btn-hint"  onclick="togHint('q8-hint')">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="resetQ('q8')">↺ リセット</button>
+    </div>
+    <div class="hint-box" id="q8-hint">
+      <div class="hint-title">💡 ヒント</div>
+      <p>● アクチュエータは「装置」であり、命令を記述するものではありません</p>
+      <p>● 命令を記述するのはプログラム（ソフトウェア）の役割です</p>
+      <p>● ①④⑤はそれぞれ入力装置・記憶装置・入力装置の正しい説明です</p>
+    </div>
+    <div class="result-box" id="q8-res"></div>
+    <div class="explain-box" id="q8-exp">
+      <div class="ex-title">📝 解答・解説</div>
+      <p><b>答え：③</b>　―「アクチュエータ」は装置であり、命令を記述するものではない</p>
+      <p>アクチュエータはコンピュータからの電気信号を物理的な動きに変える<b>装置</b>です。命令（プログラム）を記述するのはソフトウェアの役割です。</p>
+      <p><span class="mark-ok">①</span>キーボードは入力装置として文字コード等を入力します。</p>
+      <p><span class="mark-ok">②</span>D/A変換でデジタル音声をアナログ信号に変換してスピーカーへ出力します。</p>
+      <p><span class="mark-ok">④</span>ハードディスクは不揮発性の補助記憶装置です。</p>
+      <p><span class="mark-ok">⑤</span>マウスはポインティングデバイス（位置を指示する入力装置）です。</p>
+    </div>
+  </div>
+</div>
+
+<!-- スコアパネル -->
+<div class="score-panel" id="finalScore">
+  <h2>🎉 お疲れさまでした！</h2>
+  <div class="score-num" id="finalNum">— / 8</div>
+  <div class="score-comment" id="finalComment"></div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ── 状態 ──
+const state = {};
+const correct = { q1:'1', q2:'1', q3:'2', q4:'2', q5:'3', q7:'2', q8:'3' };
+let doneCount = 0;
+
+// ── 単一選択 ──
+function selRadio(qid, el) {
+  if (state[qid+'done']) return;
+  document.querySelectorAll(`#${qid}-ch .radio-item`).forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  state[qid] = el.dataset.v;
+}
+
+// ── コンボ選択 ──
+function selCombo(qid, el) {
+  if (state[qid+'done']) return;
+  document.querySelectorAll(`#${qid}-ch .combo-btn`).forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  state[qid] = el.dataset.v;
+}
+
+// ── チェックボックス ──
+function togCheck(el) {
+  if (state['q6done']) return;
+  el.classList.toggle('selected');
+  const box = el.querySelector('.ck-box');
+  box.textContent = el.classList.contains('selected') ? '✓' : '';
+}
+
+// ── ヒント ──
+function togHint(id) { document.getElementById(id).classList.toggle('show'); }
+
+// ── 採点（単一・コンボ）──
+function checkQ(qid, ans) {
+  if (state[qid+'done']) return;
+  if (!state[qid]) { noSel(qid); return; }
+  state[qid+'done'] = true;
+  const ok = state[qid] === ans;
+  // 選択肢に色付け
+  const items = document.querySelectorAll(`#${qid}-ch .radio-item, #${qid}-ch .combo-btn`);
+  items.forEach(el => {
+    el.classList.remove('selected');
+    if (el.dataset.v === ans) el.classList.add('reveal');
+    if (el.dataset.v === state[qid] && state[qid] !== ans) el.classList.add('wrong');
+  });
+  showRes(qid, ok);
+  document.getElementById(`${qid}-exp`).classList.add('show');
+  updateScore();
+}
+
+// ── 採点（複数選択）──
+function checkMulti(qid, ansArr) {
+  if (state['q6done']) return;
+  const selected = [...document.querySelectorAll(`#${qid}-ch .check-item.selected`)].map(el=>el.dataset.v).sort();
+  const ans = [...ansArr].sort();
+  if (selected.length === 0) { noSel(qid); return; }
+  state['q6done'] = true;
+  const ok = JSON.stringify(selected) === JSON.stringify(ans);
+  document.querySelectorAll(`#${qid}-ch .check-item`).forEach(el => {
+    const v = el.dataset.v;
+    const inAns = ans.includes(v);
+    const inSel = selected.includes(v);
+    el.classList.remove('selected');
+    const box = el.querySelector('.ck-box');
+    if (inAns) { el.classList.add('reveal'); box.textContent = '✓'; }
+    else if (inSel && !inAns) { el.classList.add('wrong'); box.textContent = '✗'; }
+  });
+  state['q6'] = ok ? 'ok' : 'ng';
+  showRes(qid, ok);
+  document.getElementById(`${qid}-exp`).classList.add('show');
+  updateScore();
+}
+
+function noSel(qid) {
+  const box = document.getElementById(`${qid}-res`);
+  box.className='result-box show ng';
+  box.innerHTML='<div class="r-title">⚠️ 選択肢を選んでから「答え合わせ」を押してください。</div>';
+}
+
+function showRes(qid, ok) {
+  const box = document.getElementById(`${qid}-res`);
+  box.className = `result-box show ${ok?'ok':'ng'}`;
+  box.innerHTML = `<div class="r-title">${ok?'✅ 正解です！':'❌ 不正解です。解説を確認しましょう。'}</div>`;
+}
+
+// ── リセット ──
+function resetQ(qid) {
+  if (state[qid+'done']) { state[qid+'done']=false; doneCount=Math.max(0,doneCount-1); }
+  state[qid]=null;
+  document.querySelectorAll(`#${qid}-ch .radio-item,#${qid}-ch .combo-btn`).forEach(el=>el.className=el.classList.contains('radio-item')?'radio-item':'combo-btn');
+  if (qid==='q6') {
+    state['q6done']=false;
+    document.querySelectorAll('#q6-ch .check-item').forEach(el=>{ el.classList.remove('selected','correct','wrong','reveal'); el.querySelector('.ck-box').textContent=''; });
+  }
+  ['res','exp','hint'].forEach(s=>{ const el=document.getElementById(`${qid}-${s}`); if(el){el.className=el.className.replace(' show','').replace('show','').trim(); if(s==='res')el.innerHTML='';} });
+  document.getElementById('finalScore').classList.remove('show');
+  updateScore();
+}
+
+// ── 全問一括 ──
+function checkAll() {
+  ['q1','q2','q3','q4','q5','q7','q8'].forEach(qid=>{ if(!state[qid+'done']&&state[qid]) checkQ(qid,correct[qid]); });
+  if(!state['q6done']){
+    const sel=[...document.querySelectorAll('#q6-ch .check-item.selected')];
+    if(sel.length>0) checkMulti('q6',['b','c','e']);
+  }
+  showFinal();
+}
+function resetAll() {
+  ['q1','q2','q3','q4','q5','q6','q7','q8'].forEach(q=>resetQ(q));
+}
+
+// ── スコア更新 ──
+function updateScore() {
+  let c=0;
+  ['q1','q2','q3','q4','q5','q7','q8'].forEach(qid=>{ if(state[qid+'done']&&state[qid]===correct[qid])c++; });
+  if(state['q6done']&&state['q6']==='ok')c++;
+  document.getElementById('scoreDisplay').textContent=`${c} / 8 問正解`;
+  return c;
+}
+
+function showFinal() {
+  const c=updateScore();
+  const all=['q1','q2','q3','q4','q5','q6','q7','q8'].every(q=>state[q+'done']);
+  if(!all)return;
+  const p=document.getElementById('finalScore');
+  document.getElementById('finalNum').textContent=`${c} / 8`;
+  const cmts=['😔 もう一度テキストを読み返しましょう！','💪 がんばれ！解説をしっかり読もう。','📖 あと少し！苦手な問題を復習しよう。','😊 よくできました！もう一歩で満点！','🎉 全問正解！すばらしい！！'];
+  document.getElementById('finalComment').textContent=cmts[Math.min(Math.floor(c/2),4)];
+  p.classList.add('show');
+  if(c===8) startConfetti();
+  p.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ── confetti ──
+const cvs=document.getElementById('confetti-canvas'),ctx=cvs.getContext('2d');
+let pts=[],cnfOn=false;
+function startConfetti(){
+  cvs.width=window.innerWidth;cvs.height=window.innerHeight;pts=[];
+  for(let i=0;i<220;i++)pts.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height-cvs.height,s:Math.random()*9+4,c:`hsl(${Math.random()*360},75%,65%)`,sp:Math.random()*3+2});
+  cnfOn=true;animCnf();
+  setTimeout(()=>{cnfOn=false;ctx.clearRect(0,0,cvs.width,cvs.height);pts=[];},4000);
+}
+function animCnf(){
+  if(!cnfOn)return;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  pts.forEach(p=>{p.y+=p.sp;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s);if(p.y>cvs.height)p.y=-20;});
+  requestAnimationFrame(animCnf);
+}
+</script>
+</body>
+</html>

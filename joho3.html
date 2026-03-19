@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>情報Ⅰ：コンピュータの構成(2)</title>
+  <style>
+    :root {
+      --primary: #185FA5;
+      --teal:    #0F6E56;
+      --purple:  #534AB7;
+      --amber:   #BA7517;
+      --coral:   #993C1D;
+      --gray:    #5F5E5A;
+      --bg:      #f5f7fa;
+      --drop-bg: #fff9c4;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Yu Gothic","游ゴシック",sans-serif; background: var(--bg); margin: 0; padding: 0; font-size: 14px; line-height: 1.9; color: #222; }
+
+    /* ── sticky header ── */
+    .sticky-header { position: sticky; top: 0; background: var(--bg); z-index: 1000; border-bottom: 2px solid #ddd; padding: 8px 0; }
+    .page-nav { max-width: 1050px; margin: 0 auto 6px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+    .nav-btn { text-decoration: none; background: #7f8c8d; color: #fff; padding: 5px 13px; border-radius: 4px; font-size: .78em; font-weight: bold; transition: .2s; }
+    .nav-btn:hover { background: #34495e; }
+    .nav-btn.active { background: var(--primary); border: 2px solid #f1c40f; }
+
+    /* ── challenge panel ── */
+    .challenge-panel {
+      background: #eaf0fb; border: 1.5px solid #aed6f1; color: var(--primary);
+      padding: 8px 20px; border-radius: 8px;
+      display: flex; justify-content: space-around; align-items: center;
+      max-width: 1050px; margin: 0 auto 8px; flex-wrap: wrap; gap: 8px;
+    }
+    .timer { font-size: 1.5em; font-family: monospace; font-weight: bold; color: var(--primary); }
+    .ch-btn { border: none; cursor: pointer; padding: 7px 18px; border-radius: 20px; font-weight: bold; font-size: .9em; transition: .2s; }
+    .ch-btn.start  { background: var(--teal);    color: #fff; }
+    .ch-btn.start:hover  { background: #0a4f3c; }
+    .ch-btn.answer { background: #f39c12;        color: #fff; }
+    .ch-btn.answer:hover { background: #d68910; }
+    .ch-btn.check  { background: var(--primary); color: #fff; }
+    .ch-btn.check:hover  { background: #0d3e6e; }
+    #recordDisplay { font-weight: bold; font-size: .9em; color: #8B6914; }
+
+    /* ── word bank ── */
+    .word-bank-wrap { max-width: 1050px; margin: 0 auto; }
+    .word-bank-container { background: #eee; padding: 12px 16px; border-radius: 8px; border: 1px solid #ccc; }
+    .wb-label { font-size: .82em; color: #555; margin-bottom: 6px; font-weight: bold; }
+    .word-bank { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
+    .drag-item { background: #fff; color: #c0392b; border: 1px solid #aaa; padding: 3px 12px; cursor: pointer; font-weight: bold; font-size: .9em; border-radius: 3px; transition: .15s; }
+    .drag-item.selected { background: #f1c40f; color: #333; box-shadow: 0 0 0 3px #e67e22; transform: scale(1.08); }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+    .word-bank-container.shake { animation: shake .4s ease; }
+
+    /* ── drop zone ── */
+    .dz {
+      display: inline-block; min-width: 90px; height: 1.55em;
+      background: var(--drop-bg); border: 1.5px solid #aaa;
+      vertical-align: middle; cursor: pointer; text-align: center;
+      font-weight: bold; color: #c0392b; padding: 1px 8px;
+      border-radius: 3px; transition: .15s; white-space: nowrap;
+    }
+    .dz.correct { background: #d4edda !important; border: 2px solid #28a745 !important; color: #155724 !important; }
+    .dz.wrong   { background: #f8d7da !important; border: 2px solid #dc3545 !important; color: #721c24 !important; }
+
+    /* ── main ── */
+    .container { max-width: 1050px; margin: 16px auto; background: #fff; padding: 28px 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+    /* ── headings ── */
+    .sec-h1 { font-size: 1.25em; font-weight: bold; color: var(--primary); border-bottom: 3px solid var(--primary); padding-bottom: 6px; margin: 32px 0 14px; display: flex; align-items: baseline; gap: 10px; }
+    .sec-h1 .num { font-size: .9em; }
+    .sec-h2 { font-size: 1em; font-weight: bold; color: var(--teal); border-left: 5px solid var(--teal); padding-left: 10px; margin: 20px 0 10px; }
+
+    /* ── memory table ── */
+    table.mem-table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    table.mem-table th { background: var(--primary); color: #fff; padding: 8px 14px; text-align: left; font-size: .9em; }
+    table.mem-table td { padding: 10px 14px; border: 1px solid #ddd; font-size: .9em; vertical-align: top; }
+    table.mem-table tr:nth-child(even) td { background: #f0f4fa; }
+    table.mem-table .tag-main { display: inline-block; background: #eff5fc; color: var(--primary); border: 1.5px solid var(--primary); border-radius: 4px; padding: 2px 8px; font-weight: bold; font-size: .88em; }
+    table.mem-table .tag-sub  { display: inline-block; background: #edfaf4; color: var(--teal);    border: 1.5px solid var(--teal);    border-radius: 4px; padding: 2px 8px; font-weight: bold; font-size: .88em; }
+    table.mem-table li { margin: 3px 0; }
+
+    /* ── sensor table ── */
+    table.sensor-table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    table.sensor-table th { background: var(--teal); color: #fff; padding: 8px 12px; text-align: left; font-size: .9em; }
+    table.sensor-table td { padding: 8px 12px; border: 1px solid #ddd; font-size: .9em; vertical-align: top; }
+    table.sensor-table tr:nth-child(even) td { background: #f5fbf8; }
+    .sensor-tag { display: inline-block; background: #edfaf4; color: var(--teal); border: 1.5px solid var(--teal); border-radius: 4px; padding: 2px 8px; font-weight: bold; font-size: .88em; white-space: nowrap; }
+
+    /* ── actuator box ── */
+    .actuator-box { border: 2px solid var(--coral); border-radius: 8px; padding: 16px 18px; margin: 14px 0; background: #fdf3f0; }
+    .actuator-box-title { font-weight: bold; color: var(--coral); margin-bottom: 10px; font-size: .95em; }
+    .actuator-example { background: #fff; border: 1px solid #f5c6c0; border-radius: 6px; padding: 12px 16px; }
+    .actuator-example-title { font-size: .85em; font-weight: bold; color: var(--coral); margin-bottom: 8px; }
+    .actuator-row { display: flex; align-items: baseline; gap: 8px; margin: 5px 0; font-size: .88em; }
+    .actuator-row .a-item { font-weight: bold; color: #333; min-width: 160px; }
+    .actuator-row .a-arrow { color: var(--teal); font-weight: bold; }
+    .actuator-row .a-desc { color: #555; }
+
+    /* ── cycle bar ── */
+    .cycle-wrap { margin: 20px 0; }
+    .cycle-bar  { background: var(--primary); color: #fff; text-align: center; padding: 8px; border-radius: 6px 6px 0 0; font-weight: bold; font-size: .95em; }
+    .cycle-body { background: #eff5fc; border: 1px solid #aed6f1; border-radius: 0 0 6px 6px; padding: 14px; text-align: center; font-size: .95em; line-height: 2.4; }
+    .cycle-step { display: inline-block; background: #fff; border: 1.5px solid var(--primary); border-radius: 5px; padding: 3px 10px; font-weight: bold; color: var(--primary); margin: 2px; }
+    .cycle-arrow { color: #888; font-size: 1.1em; margin: 0 4px; }
+
+    /* ── term cards（fetch/decode/writeback）── */
+    .term-cards { display: flex; flex-direction: column; gap: 0; margin: 14px 0; border: 1.5px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .term-card { padding: 14px 18px; border-bottom: 1px solid #eee; }
+    .term-card:last-child { border-bottom: none; }
+    .term-card .tc-title { font-weight: bold; color: var(--primary); margin-bottom: 4px; font-size: .95em; }
+    .term-card .tc-title .tc-en { font-family: monospace; color: var(--teal); }
+    .term-card .tc-body { font-size: .9em; color: #333; line-height: 1.85; }
+
+    /* ── popup button ── */
+    .pb {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: var(--primary); color: #fff;
+      border: none; cursor: pointer; padding: 2px 10px 2px 8px;
+      border-radius: 12px; font-size: .82em; font-weight: bold;
+      margin: 2px; transition: .15s; vertical-align: middle;
+    }
+    .pb:hover { background: #0d3e6e; }
+
+    /* ── modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 9000; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 12px; padding: 26px 30px; max-width: 500px; width: 92%; box-shadow: 0 8px 32px rgba(0,0,0,.2); position: relative; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+    .modal-title   { font-size: 1.1em; font-weight: bold; color: var(--primary); margin-bottom: 6px; border-bottom: 2px solid var(--primary); padding-bottom: 6px; }
+    .modal-english { font-family: monospace; font-size: .95em; color: var(--teal); margin-bottom: 10px; font-weight: bold; }
+    .modal-body    { font-size: .92em; line-height: 1.9; color: #333; white-space: pre-line; }
+    .modal-example { background: #f5f5f5; border-left: 4px solid var(--teal); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-top: 10px; font-size: .88em; }
+    .modal-close   { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.4em; cursor: pointer; color: #888; }
+    .modal-close:hover { color: #333; }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .actuator-row { flex-direction: column; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- modal -->
+<div class="modal-overlay" id="popupModal" onclick="closePopup(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePopup()">✕</button>
+    <div class="modal-title"   id="popupTitle"></div>
+    <div class="modal-english" id="popupEnglish"></div>
+    <div class="modal-body"    id="popupBody"></div>
+    <div class="modal-example" id="popupExample" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══ sticky header ══ -->
+<div class="sticky-header">
+    <div class="page-nav">
+    <a class="nav-btn" href="joho1.html">📖 第1章　コンピュータのしくみ</a>
+    <a class="nav-btn" href="joho1-1.html">✏️ 第1章　演習問題</a>
+    <a class="nav-btn" href="joho2.html">📖 第2章　構成(1)</a>
+    <a class="nav-btn active" href="joho3.html">📖 第2章　構成(2)</a>
+    <a class="nav-btn" href="joho4.html">✏️ 第2章　演習問題</a>
+  </div>
+
+  <div class="challenge-panel">
+    <div>
+      <span style="font-size:.85em;font-weight:bold;">⏱ チャレンジタイム</span><br>
+      <span class="timer" id="timerDisplay">00:00.0</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="ch-btn start"  onclick="startChallenge()">▶ チャレンジ開始</button>
+      <button class="ch-btn check"  onclick="checkAnswers()">✓ 答え合わせ</button>
+      <button class="ch-btn answer" onclick="showModel()">📖 お手本を見る</button>
+    </div>
+    <div id="recordDisplay">🏆 ベスト：—</div>
+  </div>
+
+  <div class="word-bank-wrap">
+    <div class="word-bank-container" id="wordBankContainer">
+      <div class="wb-label">📦 語句バンク（クリックで選択 → 空欄をクリックで入力）</div>
+      <div class="word-bank" id="wordBank"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ content ══ -->
+<div class="container">
+
+  <!-- ページタイトル -->
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:1.5em;font-weight:bold;color:var(--primary);margin-bottom:4px;">コンピュータの構成 (2)</div>
+    <div style="color:var(--teal);font-size:.95em;">主記憶・補助記憶・センサ・アクチュエータ・動作サイクル</div>
+    <p style="font-size:.92em;color:#444;line-height:1.9;text-align:left;margin-top:12px;">
+      記憶装置の種類や、スマートフォンに内蔵されているセンサの種類と用途を押さえましょう。
+      また、コンピュータの動作サイクル（フェッチ→デコード→実行→ライトバック）は共通テストで頻繁に出題されます。
+    </p>
+  </div>
+
+  <!-- ══ 3. 主記憶装置と補助記憶装置 ══ -->
+  <div class="sec-h1"><span class="num">3</span>主記憶装置と補助記憶装置</div>
+
+  <p>記憶装置は、<strong>【主記憶】</strong>装置と<strong>【補助記憶】</strong>装置の２種類があります。</p>
+
+  <table class="mem-table">
+    <tr>
+      <th>種類</th>
+      <th>特徴</th>
+      <th>代表例</th>
+    </tr>
+    <tr>
+      <td>
+        <span class="tag-main">【主記憶】装置</span><br>
+        <span style="font-size:.85em;color:var(--gray);">（メインメモリ）</span>
+      </td>
+      <td>
+        <ul style="margin:0;padding-left:16px;">
+          <li>CPUと直接データをやり取りする</li>
+          <li><span class="dz" data-ans="揮発性" data-id="m1">　　　</span>：電源を切ると消える</li>
+          <li>高速だが容量は少ない</li>
+        </ul>
+      </td>
+      <td>
+        <strong>RAM（DRAM・SRAM）</strong><br>
+        <span style="font-size:.88em;color:#555;">・実行中のプログラム・データを一時保存</span>
+        <p style="margin:6px 0 0;">
+          <button class="pb" onclick="openPopup('dram')">💡 DRAM</button>
+          <button class="pb" onclick="openPopup('sram')">💡 SRAM</button>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="tag-sub">【補助記憶】装置</span><br>
+        <span style="font-size:.85em;color:var(--gray);">（ストレージ）</span>
+      </td>
+      <td>
+        <ul style="margin:0;padding-left:16px;">
+          <li>大容量のデータを恒久的に保存</li>
+          <li><span class="dz" data-ans="不揮発性" data-id="m2">　　　</span>：電源を切ても消えない</li>
+          <li>主記憶より低速</li>
+        </ul>
+      </td>
+      <td>
+        <strong>HDD・SSD・DVDなど</strong><br>
+        <span style="font-size:.88em;color:#555;">・OS・アプリ・ファイルを保存</span>
+        <p style="margin:6px 0 0;">
+          <button class="pb" onclick="openPopup('ssd')">💡 SSD</button>
+          <button class="pb" onclick="openPopup('hdd')">💡 HDD</button>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ══ 4. センサとアクチュエータ ══ -->
+  <div class="sec-h1"><span class="num">4</span>センサと【アクチュエータ】</div>
+
+  <p>
+    スマートフォンやIoT機器には様々な<strong>【センサ】</strong>が内蔵されています。また、コンピュータからの信号を物理運動に変換する
+    <button class="pb" onclick="openPopup('actuator')">💡 【アクチュエータ】</button>
+    も重要な出題ポイントです。
+  </p>
+
+  <!-- センサの種類と用途 -->
+  <div class="sec-h2">センサの種類と用途</div>
+
+  <table class="sensor-table">
+    <tr>
+      <th>センサ名</th>
+      <th>計測対象</th>
+      <th>活用例・ポイント</th>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【タッチセンサ】</span></td>
+      <td>接触・圧力</td>
+      <td>画面タッチ操作（スマートフォン）</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【ジャイロセンサ】</span></td>
+      <td>回転・傾き</td>
+      <td>機器の向きに応じて画面縦横を切替え、ゲームコントローラなど</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【加速度センサ】</span></td>
+      <td>加速度・動き</td>
+      <td>万歩計・スマートウォッチの歩数カウント、落下検知</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【温度センサ】</span></td>
+      <td>温度</td>
+      <td>高温になったら停止させ故障を回避（過熱保護）</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【磁気センサ】</span></td>
+      <td>地磁気・磁場</td>
+      <td>スマートフォンのコンパス（方位磁石）機能、地図アプリ</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【近接センサ】</span></td>
+      <td>物体の近さ</td>
+      <td>スマートフォンを耳に当てると画面が消える</td>
+    </tr>
+    <tr>
+      <td><span class="sensor-tag">【光センサ】</span></td>
+      <td>光の強さ</td>
+      <td>周囲の明るさに応じて画面の明るさを自動調整</td>
+    </tr>
+  </table>
+
+  <!-- センサ穴埋め -->
+  <p style="font-size:.9em;margin-top:8px;">
+    ※ 位置情報を取得するセンサは
+    <span class="dz" data-ans="GPS" data-id="s1">　　</span>
+    、機器の回転・傾きを検知するセンサは
+    <span class="dz" data-ans="ジャイロセンサ" data-id="s2">　　　　　</span>
+    です。
+  </p>
+
+  <!-- アクチュエータ -->
+  <div class="actuator-box" id="actuator-section">
+    <div class="actuator-box-title">アクチュエータ</div>
+    <p style="font-size:.9em;margin-bottom:12px;">
+      コンピュータから出力された信号を
+      <button class="pb" onclick="openPopup('physical')">💡 【物理】運動</button>
+      に変換する駆動装置のことです。
+    </p>
+    <div class="actuator-example">
+      <div class="actuator-example-title">アクチュエータの例</div>
+      <div class="actuator-row">
+        <span class="a-item">・ロボットアーム</span>
+        <span class="a-arrow">→</span>
+        <span class="a-desc">電気信号でアームを動かす</span>
+      </div>
+      <div class="actuator-row">
+        <span class="a-item">・スマートフォンのバイブレータ</span>
+        <span class="a-arrow">→</span>
+        <span class="a-desc">電気信号で振動を生む</span>
+      </div>
+      <div class="actuator-row">
+        <span class="a-item">・電動ドア・自動改札</span>
+        <span class="a-arrow">→</span>
+        <span class="a-desc">電気信号でモーターを動かす</span>
+      </div>
+      <div class="actuator-row">
+        <span class="a-item">・プリンタのヘッド</span>
+        <span class="a-arrow">→</span>
+        <span class="a-desc">電気信号でインクを噴射する位置を制御</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ コンピュータの動作サイクル ══ -->
+  <div class="sec-h1"><span class="num">　</span>コンピュータの動作サイクル</div>
+
+  <div class="cycle-wrap">
+    <div class="cycle-bar">コンピュータの動作サイクル</div>
+    <div class="cycle-body">
+      <span class="dz" data-ans="フェッチ" data-id="cy1">　　　　</span>（命令を読む）
+      <span class="cycle-arrow">→</span>
+      <span class="dz" data-ans="デコード" data-id="cy2">　　　　</span>（解読）
+      <span class="cycle-arrow">→</span>
+      <span class="cycle-step">実行（演算）</span>
+      <span class="cycle-arrow">→</span>
+      <span class="dz" data-ans="ライトバック" data-id="cy3">　　　　　</span>（結果保存）
+    </div>
+  </div>
+
+  <!-- fetch / decode / write-back 用語カード -->
+  <div class="term-cards">
+    <div class="term-card">
+      <div class="tc-title">
+        <span class="tc-en">fetch</span>（フェッチ）
+        <button class="pb" onclick="openPopup('fetch')" style="margin-left:8px;">💡 詳しく</button>
+      </div>
+      <div class="tc-body">
+        英語で「取ってくる・持ってくる」という意味です。CPUがメモリから次に実行すべき命令（0と1の列）を読み出す最初のステップです。本棚から次に読む本を手に取るイメージです。
+      </div>
+    </div>
+    <div class="term-card">
+      <div class="tc-title">
+        <span class="tc-en">decode</span>（デコード）
+        <button class="pb" onclick="openPopup('decode')" style="margin-left:8px;">💡 詳しく</button>
+      </div>
+      <div class="tc-body">
+        英語で「解読する・暗号を解く」という意味です。フェッチで取ってきた0と1の命令を、「これは足し算だ」「これはデータをメモリに保存する命令だ」と解析するステップです。
+      </div>
+    </div>
+    <div class="term-card">
+      <div class="tc-title">
+        <span class="tc-en">write-back</span>（ライトバック）
+        <button class="pb" onclick="openPopup('writeback')" style="margin-left:8px;">💡 詳しく</button>
+      </div>
+      <div class="tc-body">
+        英語で「書き戻す」という意味です。演算（実行）で得られた結果を、レジスタ（CPU内部の一時記憶）やRAMに書き込む最後のステップです。計算した答えをノートに書き留めるイメージです。
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══ popup data ══ -->
+<script>
+const POPUP_DATA = {
+  dram: {
+    title:   "DRAM（ディーラム）",
+    english: "DRAM ＝ Dynamic Random Access Memory",
+    body:    "D＝Dynamic（動的）の略。コンデンサに電荷を蓄えて記憶しますが、電荷は自然に漏れるため常にリフレッシュ（再書き込み）が必要です。電源を切ると消えます（揮発性）。",
+    example: "例：パソコンのメモリ棒（DDR5など）、スマホのメモリ（LPDDR5）"
+  },
+  sram: {
+    title:   "SRAM（エスラム）",
+    english: "SRAM ＝ Static Random Access Memory",
+    body:    "S＝Static（静的）の略。フリップフロップ回路で記憶します。リフレッシュ不要で高速ですが、電源を切ると消えます（揮発性）。DRAMより高価で容量は少ないです。",
+    example: "例：CPUのL1/L2/L3キャッシュメモリ"
+  },
+  ssd: {
+    title:   "SSD（エスエスディー）",
+    english: "SSD ＝ Solid State Drive",
+    body:    "フローティングゲートトランジスタで電子を絶縁体に閉じ込めて記憶します。電源を切ってもデータが消えない不揮発性メモリです。HDDより高速・軽量・衝撃に強い。",
+    example: "例：ノートパソコンの内蔵ストレージ・USBメモリ・SDカード"
+  },
+  hdd: {
+    title:   "HDD（ハードディスクドライブ）",
+    english: "HDD ＝ Hard Disk Drive",
+    body:    "磁性体を塗ったディスクを回転させ、磁気ヘッドで読み書きする記憶装置です。電源を切ってもデータが消えない不揮発性です。容量が大きくコストが低いですが、物理的な衝撃に弱いです。",
+    example: "例：デスクトップPCの内蔵ストレージ・外付けHDD"
+  },
+  actuator: {
+    title:   "アクチュエータ（actuator）",
+    english: "英語の act（動かす）が語源",
+    body:    "コンピュータからの電気信号を物理的な動きに変える装置です。\n\nセンサ　　　　　物理世界 → コンピュータ（情報を取り込む）\nアクチュエータ　コンピュータ → 物理世界（動作を起こす）",
+    example: "例：モーター・スピーカー・LEDライト・バイブレータ・電動ドア・プリンタヘッド"
+  },
+  physical: {
+    title:   "物理運動とは",
+    english: "",
+    body:    "電気信号（デジタル）から実際に「動く・振動する・光る・音が出る」などの物理的な現象に変換することです。アクチュエータはこの変換を担います。",
+    example: ""
+  },
+  fetch: {
+    title:   "フェッチ（fetch）",
+    english: "英語で「取ってくる・持ってくる」という意味です。",
+    body:    "CPUがメモリから次に実行すべき命令（0と1の列）を読み出す最初のステップです。",
+    example: "📌 本棚から次に読む本を手に取るイメージです。"
+  },
+  decode: {
+    title:   "デコード（decode）",
+    english: "英語で「解読する・暗号を解く」という意味です。",
+    body:    "フェッチで取ってきた0と1の命令を、「これは足し算だ」「これはデータをメモリに保存する命令だ」と解析するステップです。",
+    example: "📌 暗号を解読するイメージです。"
+  },
+  writeback: {
+    title:   "ライトバック（write-back）",
+    english: "英語で「書き戻す」という意味です。",
+    body:    "演算（実行）で得られた結果を、レジスタ（CPU内部の一時記憶）やRAMに書き込む最後のステップです。",
+    example: "📌 計算した答えをノートに書き留めるイメージです。"
+  },
+};
+
+function openPopup(key) {
+  const d = POPUP_DATA[key]; if (!d) return;
+  document.getElementById('popupTitle').textContent = d.title;
+  const eng = document.getElementById('popupEnglish');
+  eng.textContent = d.english; eng.style.display = d.english ? '' : 'none';
+  document.getElementById('popupBody').textContent = d.body;
+  const ex = document.getElementById('popupExample');
+  if (d.example) { ex.textContent = d.example; ex.style.display = ''; }
+  else { ex.style.display = 'none'; }
+  document.getElementById('popupModal').classList.add('show');
+}
+function closePopup(e) {
+  if (!e || e.target === document.getElementById('popupModal'))
+    document.getElementById('popupModal').classList.remove('show');
+}
+
+// ════════════════════════════
+//  穴埋め（7か所）
+//  揮発性・不揮発性・GPS・ジャイロセンサ
+//  フェッチ・デコード・ライトバック
+// ════════════════════════════
+const WORDS = ["揮発性", "不揮発性", "GPS", "ジャイロセンサ", "フェッチ", "デコード", "ライトバック"];
+
+let selectedWord = null, isRunning = false, startTime = null, timerInt = null, bestTime = null;
+
+function fmtTime(ms) {
+  const m = Math.floor(ms/60000).toString().padStart(2,'0');
+  const s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
+  return `${m}:${s}.${Math.floor((ms%1000)/100)}`;
+}
+
+function startChallenge() {
+  document.querySelectorAll('.dz').forEach(z => { z.textContent='　　'; z.classList.remove('correct','wrong'); });
+  selectedWord = null;
+  renderWordBank([...WORDS].sort(()=>Math.random()-.5));
+  clearInterval(timerInt);
+  startTime = Date.now(); isRunning = true;
+  timerInt = setInterval(()=>{ document.getElementById('timerDisplay').textContent = fmtTime(Date.now()-startTime); }, 100);
+}
+
+function renderWordBank(words) {
+  const wb = document.getElementById('wordBank'); wb.innerHTML='';
+  words.forEach(w => wb.appendChild(makeItem(w)));
+}
+
+function makeItem(w) {
+  const el = document.createElement('span');
+  el.className = 'drag-item'; el.textContent = w;
+  el.onclick = () => {
+    document.querySelectorAll('.drag-item').forEach(d=>d.classList.remove('selected'));
+    el.classList.add('selected'); selectedWord = w;
+  };
+  return el;
+}
+
+document.querySelectorAll('.dz').forEach(z => {
+  z.addEventListener('click', () => {
+    if (!isRunning) return;
+    if (selectedWord) {
+      z.textContent = selectedWord; z.classList.remove('correct','wrong');
+      const found = [...document.querySelectorAll('#wordBank .drag-item')].find(i=>i.textContent===selectedWord);
+      if (found) found.remove();
+      selectedWord = null; document.querySelectorAll('.drag-item').forEach(d=>d.classList.remove('selected'));
+    } else if (z.textContent.trim().replace(/　/g,'')) {
+      const word = z.textContent.trim(); z.textContent='　　'; z.classList.remove('correct','wrong');
+      document.getElementById('wordBank').appendChild(makeItem(word));
+    }
+  });
+});
+
+function checkAnswers() {
+  if (!isRunning) return;
+  let allOk = true;
+  document.querySelectorAll('.dz').forEach(z => {
+    const input = z.textContent.trim().replace(/　/g,'');
+    if (!input) { allOk = false; return; }
+    if (input === z.dataset.ans) { z.classList.add('correct'); z.classList.remove('wrong'); }
+    else { z.classList.add('wrong'); z.classList.remove('correct'); allOk = false; }
+  });
+  if (allOk) {
+    clearInterval(timerInt); isRunning = false;
+    const elapsed = Date.now() - startTime;
+    if (bestTime===null||elapsed<bestTime) {
+      bestTime=elapsed; document.getElementById('recordDisplay').textContent='🏆 ベスト：'+fmtTime(bestTime);
+    }
+    startConfetti();
+  } else {
+    const wbc=document.getElementById('wordBankContainer');
+    wbc.classList.remove('shake'); void wbc.offsetWidth; wbc.classList.add('shake');
+    setTimeout(()=>wbc.classList.remove('shake'),500);
+  }
+}
+
+function showModel() {
+  clearInterval(timerInt); isRunning=false; selectedWord=null;
+  document.querySelectorAll('.dz').forEach(z=>{ z.textContent=z.dataset.ans; z.classList.remove('correct','wrong'); });
+  document.getElementById('wordBank').innerHTML='<span style="color:#888;font-size:.9em;">お手本表示中。「チャレンジ開始」で練習できます。</span>';
+  document.getElementById('timerDisplay').textContent='00:00.0';
+}
+
+// confetti
+const cvs=document.getElementById('confetti-canvas'), ctx=cvs.getContext('2d');
+let pts=[], cnfOn=false;
+function startConfetti() {
+  cvs.width=window.innerWidth; cvs.height=window.innerHeight; pts=[];
+  for(let i=0;i<200;i++) pts.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height-cvs.height,s:Math.random()*9+4,c:`hsl(${Math.random()*360},75%,65%)`,sp:Math.random()*3+2});
+  cnfOn=true; animCnf();
+  setTimeout(()=>{cnfOn=false;ctx.clearRect(0,0,cvs.width,cvs.height);pts=[];},4000);
+}
+function animCnf() {
+  if(!cnfOn)return;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  pts.forEach(p=>{p.y+=p.sp;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s);if(p.y>cvs.height)p.y=-20;});
+  requestAnimationFrame(animCnf);
+}
+
+showModel();
+</script>
+</body>
+</html>
