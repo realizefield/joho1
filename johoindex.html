@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>情報Ⅰ：単元目次</title>
+  <style>
+    :root {
+      --primary: #185FA5;
+      --teal:    #0F6E56;
+      --purple:  #534AB7;
+      --amber:   #BA7517;
+      --coral:   #993C1D;
+      --gray:    #5F5E5A;
+      --bg:      #f5f7fa;
+      --ok:      #27ae60;
+      --review:  #f39c12;
+      --alert:   #c0392b;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Yu Gothic","游ゴシック",sans-serif; background: var(--bg); margin: 0; padding: 0; font-size: 14px; line-height: 1.9; color: #222; }
+
+    /* ── ヒーロー ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #0d3e6e 100%);
+      color: #fff;
+      padding: 40px 20px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(241,196,15,.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(46,204,113,.15) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    .hero h1 { font-size: 2em; margin: 0 0 8px; font-weight: bold; letter-spacing: 2px; position: relative; }
+    .hero .sub { font-size: .95em; opacity: .92; position: relative; }
+    .hero .badge { display: inline-block; background: #f1c40f; color: #3a2a00; padding: 4px 14px; border-radius: 999px; font-size: .82em; font-weight: bold; margin-top: 10px; position: relative; }
+
+    .container { max-width: 1050px; margin: 24px auto; padding: 0 20px; }
+
+    .flow-guide { background: #fffbe8; border-left: 5px solid var(--amber); border-radius: 6px; padding: 14px 20px; margin-bottom: 20px; }
+    .flow-guide-title { color: var(--amber); font-weight: bold; font-size: 1em; margin-bottom: 6px; }
+    .flow-guide p { margin: 2px 0; font-size: .92em; }
+
+    /* ── 凡例 ── */
+    .legend { background: #fff; border: 1.5px solid #ddd; border-radius: 8px; padding: 12px 18px; margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .legend-title { font-weight: bold; color: #444; font-size: .9em; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: .85em; }
+    .legend-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; font-weight: bold; font-size: .9em; }
+    .legend-badge.a { background: var(--ok); }
+    .legend-badge.b { background: var(--review); }
+    .legend-badge.c { background: var(--alert); }
+    .reset-btn { margin-left: auto; background: #ecf0f1; color: #555; border: 1px solid #ccc; padding: 5px 12px; border-radius: 20px; font-size: .82em; cursor: pointer; font-family: inherit; font-weight: bold; }
+    .reset-btn:hover { background: #d5dbdb; }
+
+    /* ── 統計サマリー ── */
+    .summary { background: #fff; border: 2px solid var(--primary); border-radius: 12px; padding: 14px 20px; margin-bottom: 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
+    .sum-item { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: #f8f9fa; border-radius: 20px; font-weight: bold; font-size: .9em; }
+    .sum-label { color: #666; font-size: .88em; font-weight: normal; }
+    .sum-num { font-size: 1.15em; }
+    .sum-num.a { color: var(--ok); }
+    .sum-num.b { color: var(--review); }
+    .sum-num.c { color: var(--alert); }
+    .sum-num.none { color: #999; }
+
+    /* ── 章ブロック ── */
+    .chapter { background: #fff; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.08); overflow: hidden; }
+    .chapter-head { padding: 16px 24px; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .chapter-head.c1 { background: linear-gradient(90deg, var(--primary) 0%, #2575c9 100%); }
+    .chapter-head.c2 { background: linear-gradient(90deg, var(--teal) 0%, #0F8E6F 100%); }
+    .chapter-head.c3 { background: linear-gradient(90deg, var(--purple) 0%, #6B60DB 100%); }
+    .chapter-title { font-size: 1.2em; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+    .chapter-num { background: rgba(255,255,255,.25); padding: 4px 12px; border-radius: 4px; font-size: .78em; letter-spacing: 2px; }
+    .chapter-theme { font-size: .82em; opacity: .9; margin-top: 2px; }
+    .chapter-progress { background: rgba(255,255,255,.2); padding: 4px 12px; border-radius: 999px; font-size: .85em; font-weight: bold; }
+
+    /* ── 単元カード ── */
+    .unit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; padding: 18px 20px 22px; }
+    .unit-card { background: #fff; border: 1.5px solid #e0e4eb; border-radius: 8px; padding: 14px 16px; transition: .2s; position: relative; display: flex; flex-direction: column; }
+    .unit-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(24,95,165,.15); }
+    .unit-card-link { text-decoration: none; color: #222; flex: 1; display: block; }
+    .unit-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .unit-type { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: .72em; font-weight: bold; }
+    .unit-type.kaisetsu { background: #eff5fc; color: var(--primary); border: 1px solid var(--primary); }
+    .unit-type.enshu { background: #faeeda; color: var(--amber); border: 1px solid var(--amber); }
+    .unit-title { font-size: 1em; font-weight: bold; color: #222; margin: 0; }
+    .unit-desc { font-size: .82em; color: #666; margin: 4px 0 6px; line-height: 1.6; }
+    .unit-meta { display: flex; gap: 10px; margin-top: 4px; font-size: .78em; color: #888; flex-wrap: wrap; }
+
+    /* ── A/B/Cチェックボックス ── */
+    .self-check { display: flex; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ddd; align-items: center; }
+    .self-check-label { font-size: .75em; color: #888; font-weight: bold; margin-right: 4px; }
+    .grade-btn { flex: 1; padding: 6px 8px; border: 2px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: .78em; font-weight: bold; color: #888; transition: .15s; text-align: center; }
+    .grade-btn:hover { background: #f8f9fa; border-color: #aaa; }
+    .grade-btn .g-big { display: block; font-size: 1.2em; margin-bottom: 1px; }
+    .grade-btn.selected.grade-A { background: var(--ok); color: #fff; border-color: var(--ok); box-shadow: 0 2px 6px rgba(39,174,96,.4); }
+    .grade-btn.selected.grade-B { background: var(--review); color: #fff; border-color: var(--review); box-shadow: 0 2px 6px rgba(243,156,18,.4); }
+    .grade-btn.selected.grade-C { background: var(--alert); color: #fff; border-color: var(--alert); box-shadow: 0 2px 6px rgba(192,57,43,.4); }
+
+    /* ── カード左縁の帯（評価マーク） ── */
+    .unit-card.mark-A { border-left: 5px solid var(--ok); }
+    .unit-card.mark-B { border-left: 5px solid var(--review); }
+    .unit-card.mark-C { border-left: 5px solid var(--alert); }
+
+    /* 準備中 */
+    .unit-card.coming { background: #f5f5f5; border-style: dashed; opacity: .7; }
+    .unit-card.coming:hover { border-color: #ccc; box-shadow: none; }
+    .unit-card.coming .unit-card-link { cursor: not-allowed; color: #999; }
+    .unit-card.coming .unit-title { color: #999; }
+    .unit-card.coming .self-check { opacity: .3; pointer-events: none; }
+
+    /* ── 試験対策 ── */
+    .exam-tips { background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%); border: 2px solid var(--coral); border-radius: 12px; padding: 20px 24px; margin-top: 24px; }
+    .exam-tips h2 { color: var(--coral); margin: 0 0 10px; font-size: 1.15em; }
+    .exam-tips ul { margin: 0; padding-left: 20px; font-size: .92em; }
+    .exam-tips li { margin-bottom: 4px; }
+
+    footer { text-align: center; color: #888; font-size: .82em; padding: 24px 20px 40px; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.4em; }
+      .chapter-head { padding: 12px 16px; }
+      .chapter-title { font-size: 1em; }
+      .unit-grid { grid-template-columns: 1fr; padding: 14px; }
+      .legend { flex-direction: column; align-items: flex-start; }
+      .reset-btn { margin-left: 0; margin-top: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ ヒーロー ══ -->
+<div class="hero">
+  <h1>📚 情報Ⅰ 単元目次</h1>
+  <div class="sub">高認・共通テスト対策</div>
+  <div class="badge">✨ クリックで各単元に移動します</div>
+</div>
+
+<div class="container">
+
+  <!-- 学習の進め方 -->
+  <div class="flow-guide">
+    <div class="flow-guide-title">🎯 学習の進め方</div>
+    <p>① <strong>📖 解説ページ</strong>で知識を確認 → ② <strong>✏️ 演習問題</strong>で実力チェック → ③ 間違えた部分は解説に戻って復習</p>
+    <p>各単元の<strong>自己評価ボタン（A/B/C）</strong>を押すと、理解度を記録できます（ブラウザに自動保存されます）。</p>
+  </div>
+
+  <!-- 凡例 -->
+  <div class="legend">
+    <span class="legend-title">🎓 自己評価の意味：</span>
+    <span class="legend-item">
+      <span class="legend-badge a">A</span>
+      <span>OK（理解できた）</span>
+    </span>
+    <span class="legend-item">
+      <span class="legend-badge b">B</span>
+      <span>復習（もう一度）</span>
+    </span>
+    <span class="legend-item">
+      <span class="legend-badge c">C</span>
+      <span>何度も復習（要集中）</span>
+    </span>
+    <button class="reset-btn" onclick="resetAllGrades()">↺ 評価をリセット</button>
+  </div>
+
+  <!-- 統計サマリー -->
+  <div class="summary">
+    <div class="sum-item"><span class="sum-label">📊 学習状況</span></div>
+    <div class="sum-item">A：<span class="sum-num a" id="sum-a">0</span></div>
+    <div class="sum-item">B：<span class="sum-num b" id="sum-b">0</span></div>
+    <div class="sum-item">C：<span class="sum-num c" id="sum-c">0</span></div>
+    <div class="sum-item">未評価：<span class="sum-num none" id="sum-none">0</span></div>
+  </div>
+
+  <!-- ══ 第1章 ══ -->
+  <div class="chapter">
+    <div class="chapter-head c1">
+      <div>
+        <div class="chapter-title">
+          <span class="chapter-num">CHAPTER 1</span>
+          コンピュータのしくみ
+        </div>
+        <div class="chapter-theme">電気のON/OFFから計算・記憶へ</div>
+      </div>
+      <div class="chapter-progress">2 単元</div>
+    </div>
+    <div class="unit-grid">
+      <div class="unit-card" data-unit="joho1">
+        <a class="unit-card-link" href="joho1.html">
+          <div class="unit-card-head">
+            <span class="unit-type kaisetsu">📖 解説</span>
+            <h3 class="unit-title">コンピュータのしくみ</h3>
+          </div>
+          <p class="unit-desc">2進数・論理回路・フリップフロップ・5大装置・動作サイクル（フェッチ〜ライトバック）・IoTとアクチュエータ</p>
+          <div class="unit-meta">
+            <span>📝 穴埋め5か所</span><span>💡 用語10個</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho1','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho1','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho1','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+      <div class="unit-card" data-unit="joho1-1">
+        <a class="unit-card-link" href="joho1-1.html">
+          <div class="unit-card-head">
+            <span class="unit-type enshu">✏️ 演習</span>
+            <h3 class="unit-title">第1章 演習問題</h3>
+          </div>
+          <p class="unit-desc">2進数・論理回路・5大装置・動作サイクルに関する共通テスト形式の演習問題</p>
+          <div class="unit-meta">
+            <span>🎯 選択式問題</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho1-1','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho1-1','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho1-1','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 第2章 ══ -->
+  <div class="chapter">
+    <div class="chapter-head c2">
+      <div>
+        <div class="chapter-title">
+          <span class="chapter-num">CHAPTER 2</span>
+          コンピュータの構成
+        </div>
+        <div class="chapter-theme">ハードウェア・ソフトウェア・メモリ階層・センサ</div>
+      </div>
+      <div class="chapter-progress">3 単元</div>
+    </div>
+    <div class="unit-grid">
+      <div class="unit-card" data-unit="joho2">
+        <a class="unit-card-link" href="joho2.html">
+          <div class="unit-card-head">
+            <span class="unit-type kaisetsu">📖 解説</span>
+            <h3 class="unit-title">構成 (1) ハードウェアと5大装置</h3>
+          </div>
+          <p class="unit-desc">ハードウェア・ソフトウェア・5大装置の構成図・CPU（ALU/CU）の詳細・IoT・アクチュエータ</p>
+          <div class="unit-meta">
+            <span>📝 穴埋めあり</span><span>💡 用語解説</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho2','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho2','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho2','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+      <div class="unit-card" data-unit="joho3">
+        <a class="unit-card-link" href="joho3.html">
+          <div class="unit-card-head">
+            <span class="unit-type kaisetsu">📖 解説</span>
+            <h3 class="unit-title">構成 (2) メモリ・センサ</h3>
+          </div>
+          <p class="unit-desc">主記憶と補助記憶・揮発性と不揮発性・DRAM/SRAM・SSD/HDD・各種センサ・アクチュエータの応用例</p>
+          <div class="unit-meta">
+            <span>📝 穴埋めあり</span><span>💡 用語解説</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho3','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho3','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho3','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+      <div class="unit-card" data-unit="joho4">
+        <a class="unit-card-link" href="joho4.html">
+          <div class="unit-card-head">
+            <span class="unit-type enshu">✏️ 演習</span>
+            <h3 class="unit-title">第2章 演習問題</h3>
+          </div>
+          <p class="unit-desc">5大装置・記憶装置の種類・センサの活用例など、共通テスト形式の演習問題</p>
+          <div class="unit-meta">
+            <span>🎯 選択式問題</span><span>💡 ヒント付き</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho4','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho4','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho4','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 第3章 ══ -->
+  <div class="chapter">
+    <div class="chapter-head c3">
+      <div>
+        <div class="chapter-title">
+          <span class="chapter-num">CHAPTER 3</span>
+          情報社会と情報モラル
+        </div>
+        <div class="chapter-theme">個人情報・知的財産・セキュリティ</div>
+      </div>
+      <div class="chapter-progress">1 / 3 単元</div>
+    </div>
+    <div class="unit-grid">
+      <div class="unit-card" data-unit="joho5">
+        <a class="unit-card-link" href="joho5.html">
+          <div class="unit-card-head">
+            <span class="unit-type kaisetsu">📖 解説</span>
+            <h3 class="unit-title">情報社会 (1) 個人情報と知的財産</h3>
+          </div>
+          <p class="unit-desc">情報の3特性（残存性・複製性・伝播性）・個人情報とプライバシー・オプトイン/アウト・著作権と産業財産権</p>
+          <div class="unit-meta">
+            <span>📝 穴埋め10か所</span><span>💡 用語14個</span><span>🆕 NEW</span>
+          </div>
+        </a>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A" onclick="setGrade('joho5','A')"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B" onclick="setGrade('joho5','B')"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C" onclick="setGrade('joho5','C')"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+      <div class="unit-card coming" data-unit="joho6">
+        <span class="unit-card-link">
+          <div class="unit-card-head">
+            <span class="unit-type kaisetsu">📖 解説</span>
+            <h3 class="unit-title">情報社会 (2) 情報セキュリティ（準備中）</h3>
+          </div>
+          <p class="unit-desc">サイバー犯罪・フィッシング・マルウェア・情報セキュリティの3要素・情報モラル</p>
+          <div class="unit-meta">
+            <span>🚧 準備中</span>
+          </div>
+        </span>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+      <div class="unit-card coming" data-unit="joho7">
+        <span class="unit-card-link">
+          <div class="unit-card-head">
+            <span class="unit-type enshu">✏️ 演習</span>
+            <h3 class="unit-title">第3章 演習問題（準備中）</h3>
+          </div>
+          <p class="unit-desc">個人情報・著作権・セキュリティに関する共通テスト形式の演習問題</p>
+          <div class="unit-meta">
+            <span>🚧 準備中</span>
+          </div>
+        </span>
+        <div class="self-check">
+          <span class="self-check-label">理解度</span>
+          <button class="grade-btn grade-A"><span class="g-big">A</span>OK</button>
+          <button class="grade-btn grade-B"><span class="g-big">B</span>復習</button>
+          <button class="grade-btn grade-C"><span class="g-big">C</span>何度も</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 試験対策のコツ ══ -->
+  <div class="exam-tips">
+    <h2>🎯 高認・共通テストを突破するコツ</h2>
+    <ul>
+      <li><strong>繰り返しが命</strong>：同じ単元を3回以上こなすと、タイマーのベスト記録が更新できます。</li>
+      <li><strong>用語は英語名もセットで覚える</strong>：共通テストでは「ALU」「CU」「IoT」などの略語の意味が問われます。💡ボタンで正式名称を必ず確認しましょう。</li>
+      <li><strong>穴埋めで覚える</strong>：読むだけよりも、自分で語句を選ぶ方が記憶に残りやすくなります。</li>
+      <li><strong>演習で間違えた問題は宝物</strong>：間違えた問題こそ、解説に戻って再確認する価値があります。</li>
+      <li><strong>自己評価を活用</strong>：各単元のA/B/Cボタンで理解度を記録し、B・Cを重点的に復習しましょう。</li>
+    </ul>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  情報Ⅰ 学習教材 ／ 高認・共通テスト対策
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// 自己評価（A/B/C）の保存機能
+// ══════════════════════════════════════════
+const STORAGE_KEY = 'johoStudyGrades';
+
+function loadGrades() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  } catch(e) {
+    return {};
+  }
+}
+
+function saveGrades(grades) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(grades));
+  } catch(e) {
+    // localStorage不可環境では静かに失敗
+  }
+}
+
+function setGrade(unitId, grade) {
+  const grades = loadGrades();
+  // 同じ評価を再度押したら解除
+  if (grades[unitId] === grade) {
+    delete grades[unitId];
+  } else {
+    grades[unitId] = grade;
+  }
+  saveGrades(grades);
+  renderGrades();
+}
+
+function renderGrades() {
+  const grades = loadGrades();
+  let countA = 0, countB = 0, countC = 0, countNone = 0;
+  
+  document.querySelectorAll('.unit-card').forEach(card => {
+    const unitId = card.dataset.unit;
+    const isComing = card.classList.contains('coming');
+    const grade = grades[unitId];
+    
+    // ボタンとマークをリセット
+    card.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('selected'));
+    card.classList.remove('mark-A', 'mark-B', 'mark-C');
+    
+    if (grade && !isComing) {
+      const selBtn = card.querySelector('.grade-btn.grade-' + grade);
+      if (selBtn) selBtn.classList.add('selected');
+      card.classList.add('mark-' + grade);
+    }
+    
+    // 集計（準備中は除外）
+    if (!isComing) {
+      if (grade === 'A') countA++;
+      else if (grade === 'B') countB++;
+      else if (grade === 'C') countC++;
+      else countNone++;
+    }
+  });
+  
+  document.getElementById('sum-a').textContent = countA;
+  document.getElementById('sum-b').textContent = countB;
+  document.getElementById('sum-c').textContent = countC;
+  document.getElementById('sum-none').textContent = countNone;
+}
+
+function resetAllGrades() {
+  if (!confirm('すべての自己評価をリセットしますか？')) return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch(e) {}
+  renderGrades();
+}
+
+// 初期表示
+renderGrades();
+</script>
+
+</body>
+</html>
