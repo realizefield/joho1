@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>情報1 学習単元表</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Yu Gothic','BIZ UDGothic','Hiragino Kaku Gothic Pro','Meiryo',sans-serif;background:#eef2f7;color:#1a1a2e;min-height:100vh;font-size:15px}
+
+/* ━━━ トップヘッダー ━━━ */
+.top-header{background:linear-gradient(135deg,#0d4f7a 0%,#0891b2 100%);color:#fff;padding:16px 16px 0;text-align:center}
+.top-header h1{font-size:20px;font-weight:700;letter-spacing:.05em}
+.top-header p{font-size:12px;margin-top:3px;opacity:.85}
+
+/* サマリーバー */
+.summary-bar{background:rgba(0,0,0,.25);margin-top:12px;padding:11px 14px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:12px;color:#fff}
+.sum-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sum-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sum-dot-a{background:#4caf50}
+.sum-dot-b{background:#f9a825}
+.sum-dot-c{background:#e53935}
+.sum-dot-n{background:#aaa}
+.sum-count{font-weight:700;font-size:15px;min-width:18px;text-align:center}
+
+.wrap{max-width:960px;margin:0 auto;padding:16px 12px 48px}
+
+/* 学習の流れ */
+.flow{background:#fff;border-radius:14px;border:1px solid #dde3ee;padding:14px 16px;margin-bottom:20px}
+.flow-title{font-size:14px;font-weight:700;color:#0d4f7a;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #0891b2}
+.flow-steps{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.flow-step{background:#e0f2fe;border:1px solid #38bdf8;border-radius:8px;padding:7px 12px;font-size:12px;color:#0d4f7a;font-weight:700;white-space:nowrap}
+.flow-arrow{color:#0891b2;font-size:16px;font-weight:700}
+
+/* 章セクション */
+.unit{background:#fff;border-radius:14px;border:1px solid #dde3ee;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden}
+.unit-hd{padding:14px 18px;display:flex;align-items:center;gap:12px;color:#fff}
+.unit-num{background:rgba(255,255,255,.22);border-radius:8px;padding:4px 12px;font-size:14px;font-weight:700;white-space:nowrap}
+.unit-icon{font-size:24px}
+.unit-title{font-size:17px;font-weight:700;flex:1}
+.unit-subtitle{font-size:11px;opacity:.8;letter-spacing:.05em;display:block;margin-top:2px}
+.unit-badge{font-size:11px;background:rgba(255,255,255,.3);border-radius:10px;padding:3px 10px;white-space:nowrap;font-weight:700}
+.unit-body{padding:14px 16px}
+
+/* 章カラーバー */
+.unit-hd-ch1{background:linear-gradient(90deg,#0369a1,#0ea5e9)}
+.unit-hd-ch2{background:linear-gradient(90deg,#b45309,#f59e0b)}
+.unit-hd-ch3{background:linear-gradient(90deg,#991b1b,#dc2626)}
+.unit-hd-ch4{background:linear-gradient(90deg,#115e59,#0d9488)}
+.unit-hd-ch5{background:linear-gradient(90deg,#15803d,#16a34a)}
+.unit-hd-ch6{background:linear-gradient(90deg,#5b21b6,#7c3aed)}
+.unit-hd-ch7{background:linear-gradient(90deg,#991b1b,#dc2626)}
+
+/* 単元カード */
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:4px}
+.sec-card{border-radius:10px;border:1.5px solid #dde3ee;overflow:hidden;transition:.2s;background:#fff;display:flex;flex-direction:column}
+.sec-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.1);transform:translateY(-1px)}
+.sec-card a{text-decoration:none;color:inherit;display:block}
+
+/* 章別カラー(カード) */
+.sec-card.ch-1 .sc-hd{background:#e0f2fe;border-bottom:2px solid #0369a1}
+.sec-card.ch-1 .sc-num{background:#0369a1}
+.sec-card.ch-1 .sc-title{color:#075985}
+.sec-card.ch-1 .sc-btn-learn{background:#0369a1}
+.sec-card.ch-1 .sc-btn-learn:hover{background:#0c4a6e}
+
+.sec-card.ch-2 .sc-hd{background:#fef3c7;border-bottom:2px solid #b45309}
+.sec-card.ch-2 .sc-num{background:#b45309}
+.sec-card.ch-2 .sc-title{color:#78350f}
+.sec-card.ch-2 .sc-btn-learn{background:#b45309}
+.sec-card.ch-2 .sc-btn-learn:hover{background:#78350f}
+
+.sec-card.ch-3 .sc-hd{background:#fee2e2;border-bottom:2px solid #991b1b}
+.sec-card.ch-3 .sc-num{background:#991b1b}
+.sec-card.ch-3 .sc-title{color:#7f1d1d}
+.sec-card.ch-3 .sc-btn-learn{background:#991b1b}
+.sec-card.ch-3 .sc-btn-learn:hover{background:#7f1d1d}
+
+.sec-card.ch-4 .sc-hd{background:#ccfbf1;border-bottom:2px solid #115e59}
+.sec-card.ch-4 .sc-num{background:#115e59}
+.sec-card.ch-4 .sc-title{color:#134e4a}
+.sec-card.ch-4 .sc-btn-learn{background:#115e59}
+.sec-card.ch-4 .sc-btn-learn:hover{background:#134e4a}
+
+.sec-card.ch-5 .sc-hd{background:#dcfce7;border-bottom:2px solid #15803d}
+.sec-card.ch-5 .sc-num{background:#15803d}
+.sec-card.ch-5 .sc-title{color:#14532d}
+.sec-card.ch-5 .sc-btn-learn{background:#15803d}
+.sec-card.ch-5 .sc-btn-learn:hover{background:#14532d}
+
+.sec-card.ch-6 .sc-hd{background:#ede9fe;border-bottom:2px solid #5b21b6}
+.sec-card.ch-6 .sc-num{background:#5b21b6}
+.sec-card.ch-6 .sc-title{color:#4c1d95}
+.sec-card.ch-6 .sc-btn-learn{background:#5b21b6}
+.sec-card.ch-6 .sc-btn-learn:hover{background:#4c1d95}
+
+.sec-card.ch-7 .sc-hd{background:#fee2e2;border-bottom:2px solid #991b1b}
+.sec-card.ch-7 .sc-num{background:#991b1b}
+.sec-card.ch-7 .sc-title{color:#7f1d1d}
+.sec-card.ch-7 .sc-btn-learn{background:#991b1b}
+.sec-card.ch-7 .sc-btn-learn:hover{background:#7f1d1d}
+
+.sc-hd{padding:10px 12px;display:flex;align-items:center;gap:8px;min-height:60px}
+.sc-num{color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;padding:4px 10px;min-width:38px;text-align:center}
+.sc-title{font-size:13px;font-weight:700;flex:1;line-height:1.35}
+
+.sc-body{padding:9px 12px;background:#fff}
+.sc-btn-row{display:flex;gap:6px}
+.sc-btn{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;transition:.15s;font-family:inherit;border:none;cursor:pointer;display:block;color:#fff}
+.sc-btn-soon{background:#bbb;color:#fff;cursor:not-allowed;pointer-events:none}
+
+/* A/B/C 自己評価ボタン */
+.abc-row{display:flex;gap:6px;padding:8px 12px 10px;margin-top:auto}
+.abc-btn{flex:1;padding:7px 2px;border-radius:20px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s;border:2px solid;text-align:center;background:#fff}
+.abc-btn-a{border-color:#2e7d32;color:#fff;background:#43a047}
+.abc-btn-b{border-color:#f9a825;color:#fff;background:#f9a825}
+.abc-btn-c{border-color:#e53935;color:#fff;background:#e53935}
+.abc-btn:hover{opacity:.85}
+.abc-btn-a.sel{background:#1b5e20;border-color:#1b5e20}
+.abc-btn-b.sel{background:#bf360c;color:#fff;border-color:#bf360c}
+.abc-btn-c.sel{background:#b71c1c;color:#fff;border-color:#b71c1c}
+
+/* 進捗状況に応じてカードの色を変更 */
+.sec-card.status-a{border-color:#2e7d32;border-width:2.5px}
+.sec-card.status-a .sc-hd{background:#e8f5e9 !important;border-bottom-color:#2e7d32 !important}
+.sec-card.status-b{border-color:#f9a825;border-width:2.5px}
+.sec-card.status-b .sc-hd{background:#fff9e6 !important;border-bottom-color:#f9a825 !important}
+.sec-card.status-c{border-color:#e53935;border-width:2.5px}
+.sec-card.status-c .sc-hd{background:#fce8e8 !important;border-bottom-color:#e53935 !important}
+
+/* 進捗バー */
+.progress-section{background:#fff;border-radius:14px;border:1px solid #dde3ee;padding:14px 16px;margin-bottom:20px}
+.progress-title{font-size:14px;font-weight:700;color:#0d4f7a;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #0891b2;display:flex;justify-content:space-between;align-items:center}
+.progress-pct-text{color:#0891b2;font-size:16px}
+.progress-bar{background:#e0f2fe;border-radius:20px;height:14px;overflow:hidden;border:1px solid #bae6fd}
+.progress-fill{background:linear-gradient(90deg,#0891b2,#22d3ee,#fbbf24);height:100%;border-radius:20px;transition:.6s;box-shadow:0 0 8px rgba(8,145,178,.4)}
+
+/* 紙吹雪 */
+canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;display:none}
+
+/* レスポンシブ */
+@media (max-width:640px){
+  .top-header h1{font-size:17px}
+  .summary-bar{font-size:11px;gap:10px}
+  .unit-hd{padding:12px 14px}
+  .unit-title{font-size:15px}
+  .unit-icon{font-size:20px}
+}
+</style>
+</head>
+<body>
+<canvas id="cc"></canvas>
+
+<div class="top-header">
+  <h1>📘 情報1 学習単元表</h1>
+  <p>共通テスト・高卒認定試験 対応 ― 7章・全65単元 ―</p>
+  <div class="summary-bar">
+    <div class="sum-item"><span class="sum-dot sum-dot-a"></span>A わかった <span class="sum-count" id="cnt-a">0</span> 単元</div>
+    <div class="sum-item"><span class="sum-dot sum-dot-b"></span>B 要復習 <span class="sum-count" id="cnt-b">0</span> 単元</div>
+    <div class="sum-item"><span class="sum-dot sum-dot-c"></span>C 何度も復習 <span class="sum-count" id="cnt-c">0</span> 単元</div>
+    <div class="sum-item"><span class="sum-dot sum-dot-n"></span>未実施 <span class="sum-count" id="cnt-n">65</span> 単元</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 進捗バー -->
+  <div class="progress-section">
+    <div class="progress-title">
+      <span>📊 全体の進捗</span>
+      <span class="progress-pct-text" id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- 学習の流れ -->
+  <div class="flow">
+    <div class="flow-title">📖 学習の進め方</div>
+    <div class="flow-steps">
+      <div class="flow-step">① 単元を選ぶ</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">② 5モードで学習</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">③ 全問正解で🎉</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">④ A/B/Cで自己評価</div>
+    </div>
+  </div>
+
+  <!-- 章ごとのカード -->
+  <div id="chaptersWrap"></div>
+
+</div>
+
+<script>
+const CHAPTERS = [
+  {
+    "no": 1, "title": "情報社会", "subtitle": "Information Society", "icon": "🌐",
+    "units": [
+      {"id":"ch1u1","num":"①","title":"情報の特徴と情報社会","main":"joho1.html#unit1"},
+      {"id":"ch1u2","num":"②","title":"メディアとコミュニケーションの基礎","main":"joho1.html#unit2"},
+      {"id":"ch1u3","num":"③","title":"メディアリテラシー","main":"joho1.html#unit3"},
+      {"id":"ch1u4","num":"④","title":"個人情報と肖像権","main":"joho1.html#unit4"},
+      {"id":"ch1u5","num":"⑤","title":"情報モラルと法","main":"joho1.html#unit5"},
+      {"id":"ch1u6","num":"⑥","title":"情報社会の問題","main":"joho1.html#unit6"},
+      {"id":"ch1u7","num":"⑦","title":"コンピュータの発達","main":"joho1.html#unit7"},
+      {"id":"ch1u8","num":"⑧","title":"コンピュータの構成","main":"joho1.html#unit8"}
+    ]
+  },
+  {
+    "no": 2, "title": "コミュニケーションと情報デザイン", "subtitle": "Communication & Design", "icon": "🎨",
+    "units": [
+      {"id":"ch2u1","num":"①","title":"コミュニケーション","main":"joho2.html#unit1"},
+      {"id":"ch2u2","num":"②","title":"メディアの分類と特性","main":"joho2.html#unit2"},
+      {"id":"ch2u3","num":"③","title":"情報デザインの考え方","main":"joho2.html#unit3"},
+      {"id":"ch2u4","num":"④","title":"ユーザインタフェース","main":"joho2.html#unit4"},
+      {"id":"ch2u5","num":"⑤","title":"ユニバーサルデザイン","main":"joho2.html#unit5"},
+      {"id":"ch2u6","num":"⑥","title":"ピクトグラムとサイン","main":"joho2.html#unit6"},
+      {"id":"ch2u7","num":"⑦","title":"Webデザインと色彩","main":"joho2.html#unit7"},
+      {"id":"ch2u8","num":"⑧","title":"社会の中の情報システム","main":"joho2.html#unit8"},
+      {"id":"ch2u9","num":"⑨","title":"情報技術の活用","main":"joho2.html#unit9"},
+      {"id":"ch2u10","num":"⑩","title":"人に優しい情報技術","main":"joho2.html#unit10"}
+    ]
+  },
+  {
+    "no": 3, "title": "情報安全", "subtitle": "Information Security", "icon": "🔒",
+    "units": [
+      {"id":"ch3u1","num":"①","title":"個人による安全対策","main":"joho3.html#unit1"},
+      {"id":"ch3u2","num":"②","title":"組織による安全対策","main":"joho3.html#unit2"},
+      {"id":"ch3u3","num":"③","title":"安全のための情報技術","main":"joho3.html#unit3"},
+      {"id":"ch3u4","num":"④","title":"暗号化","main":"joho3.html#unit4"},
+      {"id":"ch3u5","num":"⑤","title":"暗号化の仕組み(RSA暗号)","main":"joho3.html#unit5"},
+      {"id":"ch3u6","num":"⑥","title":"法規による安全対策","main":"joho3.html#unit6"},
+      {"id":"ch3u7","num":"⑦","title":"知的財産権・産業財産権","main":"joho3.html#unit7"},
+      {"id":"ch3u8","num":"⑧","title":"著作権","main":"joho3.html#unit8"},
+      {"id":"ch3u9","num":"⑨","title":"著作物の利用","main":"joho3.html#unit9"}
+    ]
+  },
+  {
+    "no": 4, "title": "ディジタル化", "subtitle": "Digitization", "icon": "💾",
+    "units": [
+      {"id":"ch4u1","num":"①","title":"アナログとディジタル","main":"joho4.html#u1"},
+      {"id":"ch4u2","num":"②","title":"コンピュータの2進法","main":"joho4.html#u2"},
+      {"id":"ch4u3","num":"③","title":"ビットとバイト","main":"joho4.html#u3"},
+      {"id":"ch4u4","num":"④","title":"情報量の単位の階段","main":"joho4.html#u4"},
+      {"id":"ch4u5","num":"⑤","title":"ペイント系とドロー系","main":"joho4.html#u5"},
+      {"id":"ch4u6","num":"⑥","title":"進数変換(2/10/16進数)","main":"joho4.html#u6"},
+      {"id":"ch4u7","num":"⑦","title":"文字コード","main":"joho4.html#u7"},
+      {"id":"ch4u8","num":"⑧","title":"音のディジタル化","main":"joho4.html#u8"},
+      {"id":"ch4u9","num":"⑨","title":"光の三原色とRGB","main":"joho4.html#u9"},
+      {"id":"ch4u10","num":"⑩","title":"色の三原色とCMY","main":"joho4.html#u10"},
+      {"id":"ch4u11","num":"⑪","title":"解像度と階調","main":"joho4.html#u11"},
+      {"id":"ch4u12","num":"⑫","title":"圧縮の種類と仕組み","main":"joho4.html#u12"},
+      {"id":"ch4u13","num":"⑬","title":"音と画像の圧縮","main":"joho4.html#u13"},
+      {"id":"ch4u14","num":"⑭","title":"動画の圧縮","main":"joho4.html#u14"}
+    ]
+  },
+  {
+    "no": 5, "title": "問題解決", "subtitle": "Problem Solving", "icon": "🧩",
+    "units": [
+      {"id":"ch5u1","num":"①","title":"問題解決の流れ","main":"joho5.html#u1"},
+      {"id":"ch5u2","num":"②","title":"情報の収集","main":"joho5.html#u2"},
+      {"id":"ch5u3","num":"③","title":"検索と論理演算","main":"joho5.html#u3"},
+      {"id":"ch5u4","num":"④","title":"情報の整理","main":"joho5.html#u4"},
+      {"id":"ch5u5","num":"⑤","title":"論理的な文章構成","main":"joho5.html#u5"},
+      {"id":"ch5u6","num":"⑥","title":"表現の工夫","main":"joho5.html#u6"},
+      {"id":"ch5u7","num":"⑦","title":"データの種類","main":"joho5.html#u7"},
+      {"id":"ch5u8","num":"⑧","title":"度数分布表とヒストグラム","main":"joho5.html#u8"},
+      {"id":"ch5u9","num":"⑨","title":"代表値","main":"joho5.html#u9"},
+      {"id":"ch5u10","num":"⑩","title":"分散と標準偏差","main":"joho5.html#u10"},
+      {"id":"ch5u11","num":"⑪","title":"散布図と相関","main":"joho5.html#u11"},
+      {"id":"ch5u12","num":"⑫","title":"クロス集計","main":"joho5.html#u12"},
+      {"id":"ch5u13","num":"⑬","title":"統計とデータ活用","main":"joho5.html#u13"}
+    ]
+  },
+  {
+    "no": 6, "title": "アルゴリズムとプログラミング", "subtitle": "Algorithm & Programming", "icon": "💻",
+    "units": [
+      {"id":"ch6u1","num":"①","title":"アルゴリズムとフローチャート","main":"joho6.html#u1"},
+      {"id":"ch6u2","num":"②","title":"数値と文字列・算術演算子","main":"joho6.html#u2"},
+      {"id":"ch6u3","num":"③","title":"変数(箱のたとえ)","main":"joho6.html#u3"},
+      {"id":"ch6u4","num":"④","title":"比較演算子","main":"joho6.html#u4"},
+      {"id":"ch6u5","num":"⑤","title":"分岐構造","main":"joho6.html#u5"},
+      {"id":"ch6u6","num":"⑥","title":"繰り返し処理","main":"joho6.html#u6"},
+      {"id":"ch6u7","num":"⑦","title":"関数","main":"joho6.html#u7"},
+      {"id":"ch6u8","num":"⑧","title":"実践(高認類題)","main":"joho6.html#u8"}
+    ]
+  },
+  {
+    "no": 7, "title": "情報技術の仕組み", "subtitle": "Information Technology Systems", "icon": "🌐",
+    "units": [
+      {"id":"ch7u1","num":"①","title":"コンピュータの仕組み","main":"joho7.html#u1"},
+      {"id":"ch7u2","num":"②","title":"インターネットの仕組み","main":"joho7.html#u2"},
+      {"id":"ch7u3","num":"③","title":"メールの仕組み(POP・SMTP・IMAP)","main":"joho7.html#u3"}
+    ]
+  }
+];
+
+const ALL_UNIT_IDS = CHAPTERS.flatMap(c => c.units.map(u => u.id));
+const STORAGE_KEY = 'joho_status_v2';
+let status = {};
+
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) status = JSON.parse(saved);
+} catch(e) {}
+
+function saveStatus() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(status)); } catch(e) {}
+}
+
+function buildChapters() {
+  const wrap = document.getElementById('chaptersWrap');
+  wrap.innerHTML = CHAPTERS.map(ch => `
+    <div class="unit">
+      <div class="unit-hd unit-hd-ch${ch.no}">
+        <span class="unit-num">第${ch.no}章</span>
+        <span class="unit-icon">${ch.icon}</span>
+        <div class="unit-title" style="flex:1">
+          ${ch.title}
+          <span class="unit-subtitle">${ch.subtitle}</span>
+        </div>
+        <span class="unit-badge">全${ch.units.length}単元</span>
+      </div>
+      <div class="unit-body">
+        <div class="sec-grid">
+          ${ch.units.map(u => `
+            <div class="sec-card ch-${ch.no}" data-id="${u.id}">
+              <a href="${u.main}">
+                <div class="sc-hd">
+                  <span class="sc-num">${u.num}</span>
+                  <span class="sc-title">${u.title}</span>
+                </div>
+              </a>
+              <div class="sc-body">
+                <div class="sc-btn-row">
+                  <a class="sc-btn sc-btn-learn" href="${u.main}">学習を始める</a>
+                </div>
+              </div>
+              <div class="abc-row">
+                <button class="abc-btn abc-btn-a" onclick="setABC('${u.id}','a',this)">A OK</button>
+                <button class="abc-btn abc-btn-b" onclick="setABC('${u.id}','b',this)">B 要復習</button>
+                <button class="abc-btn abc-btn-c" onclick="setABC('${u.id}','c',this)">C 何度も</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyStoredStatus() {
+  Object.keys(status).forEach(id => {
+    const grade = status[id];
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (!card) return;
+    card.classList.add('status-' + grade);
+    const btn = card.querySelector('.abc-btn-' + grade);
+    if (btn) btn.classList.add('sel');
+  });
+}
+
+function setABC(id, grade, btn) {
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (!card) return;
+
+  if (status[id] === grade) {
+    // 同じボタンを再クリックしたら解除
+    delete status[id];
+    card.className = card.className.replace(/ ?status-[abc]/g,'');
+    card.querySelectorAll('.abc-btn').forEach(b => b.classList.remove('sel'));
+    saveStatus();
+    updateSummary();
+    return;
+  }
+  
+  status[id] = grade;
+  card.className = card.className.replace(/ ?status-[abc]/g,'');
+  card.classList.add('status-' + grade);
+  card.querySelectorAll('.abc-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  saveStatus();
+  
+  if (grade === 'a') confetti();
+  updateSummary();
+}
+
+function updateSummary() {
+  let ca=0, cb=0, cc=0, cn=0;
+  ALL_UNIT_IDS.forEach(id => {
+    const s = status[id];
+    if (s === 'a') ca++;
+    else if (s === 'b') cb++;
+    else if (s === 'c') cc++;
+    else cn++;
+  });
+  document.getElementById('cnt-a').textContent = ca;
+  document.getElementById('cnt-b').textContent = cb;
+  document.getElementById('cnt-c').textContent = cc;
+  document.getElementById('cnt-n').textContent = cn;
+  
+  // 進捗バー（A=100%、B=50%、C=25%）
+  const total = ALL_UNIT_IDS.length;
+  const score = (ca * 100 + cb * 50 + cc * 25) / total;
+  const pct = Math.round(score);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function confetti() {
+  const cv = document.getElementById('cc');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  cv.style.display = 'block';
+  const ctx = cv.getContext('2d');
+  const cols = ['#0891b2','#22d3ee','#f59e0b','#dc2626','#7c3aed','#16a34a','#fbbf24','#0ea5e9'];
+  const ps = [];
+  for (let k=0; k<130; k++) {
+    ps.push({
+      x: Math.random() * cv.width,
+      y: -20 - Math.random() * 180,
+      w: 7 + Math.random() * 9,
+      h: 3 + Math.random() * 5,
+      c: cols[Math.floor(Math.random() * cols.length)],
+      s: 2 + Math.random() * 4,
+      a: Math.random() * 360,
+      sp: 3 - Math.random() * 6,
+      d: (Math.random() - 0.5) * 2.5
+    });
+  }
+  let fr = 0;
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ps.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a * Math.PI / 180);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.y += p.s;
+      p.x += p.d;
+      p.a += p.sp;
+    });
+    fr++;
+    if (fr < 100) requestAnimationFrame(draw);
+    else {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      cv.style.display = 'none';
+    }
+  }
+  draw();
+}
+
+// 初期化
+buildChapters();
+applyStoredStatus();
+updateSummary();
+</script>
+</body>
+</html>
